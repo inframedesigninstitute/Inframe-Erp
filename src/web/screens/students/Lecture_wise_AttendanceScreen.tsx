@@ -1,222 +1,218 @@
-import { useMemo, useState } from "react"
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
-import Icon from "react-native-vector-icons/MaterialIcons"
+import { Picker } from "@react-native-picker/picker";
+import { useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-type AttendanceEntry = {
-  subject: string
-  date: string // ISO date: YYYY-MM-DD
-  total: number
-  present: number
+type AttendanceStatus = "P" | "A" | "L" | "H" | "";
+
+type CourseAttendance = {
+  course: string;
+  days: AttendanceStatus[];
+};
+
+const MONTHS = [
+  { label: "January", value: 1 },
+  { label: "February", value: 2 },
+  { label: "March", value: 3 },
+  { label: "April", value: 4 },
+  { label: "May", value: 5 },
+  { label: "June", value: 6 },
+  { label: "July", value: 7 },
+  { label: "August", value: 8 },
+  { label: "September", value: 9 },
+  { label: "October", value: 10 },
+  { label: "November", value: 11 },
+  { label: "December", value: 12 },
+];
+
+const YEARS = [2025, 2024, 2023, 2022, 2021];
+
+function getDaysInMonth(year: number, month1to12: number) {
+  return new Date(year, month1to12, 0).getDate();
 }
 
-const SUBJECTS = [
-  "COMPUTER NETWORKS",
-  "DATA STRUCTURES USING C++",
-  "DATABASE MANAGEMENT SYSTEMS",
-  "G2- DATA STRUCTURES LAB USING C++",
-  "G2- DBMS LAB",
-  "G2- WEB DEVELOPMENT LAB",
-  "MATHEMATICAL FOUNDATIONS OF COMPUTER SCIENCE",
-  "SOFTWARE PROJECT MANAGEMENT",
-  "WEB DEVELOPMENT",
-]
-
-const MOCK_DATA: AttendanceEntry[] = [
-  { subject: "COMPUTER NETWORKS", date: "2025-09-10", total: 1, present: 1 },
-  { subject: "COMPUTER NETWORKS", date: "2025-09-18", total: 1, present: 0 },
-  { subject: "DATA STRUCTURES USING C++", date: "2025-09-05", total: 1, present: 1 },
-  { subject: "DATABASE MANAGEMENT SYSTEMS", date: "2025-09-22", total: 1, present: 1 },
-  { subject: "G2- DATA STRUCTURES LAB USING C++", date: "2025-09-25", total: 2, present: 2 },
-  { subject: "G2- DBMS LAB", date: "2025-10-03", total: 2, present: 1 },
-  { subject: "G2- WEB DEVELOPMENT LAB", date: "2025-10-05", total: 2, present: 2 },
-  { subject: "MATHEMATICAL FOUNDATIONS OF COMPUTER SCIENCE", date: "2025-10-06", total: 1, present: 1 },
-  { subject: "SOFTWARE PROJECT MANAGEMENT", date: "2025-10-08", total: 1, present: 0 },
-  { subject: "WEB DEVELOPMENT", date: "2025-10-10", total: 1, present: 1 },
-]
-
-function formatDisplayDate(d?: string) {
-  if (!d) return ""
-  const dt = new Date(d)
-  const dd = String(dt.getDate()).padStart(2, "0")
-  const mm = String(dt.getMonth() + 1).padStart(2, "0")
-  const yyyy = dt.getFullYear()
-  return `${dd}-${mm}-${yyyy}`
+function padDay(n: number) {
+  return n < 10 ? `0${n}` : String(n);
 }
 
-export default function LectureWiseAttendanceScreen() {
-  const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), [])
-  const [fromDate, setFromDate] = useState(todayIso)
-  const [toDate, setToDate] = useState(todayIso)
-  const [results, setResults] = useState<Array<{ subject: string; total: number; present: number }>>([])
+function summarize(days: AttendanceStatus[]) {
+  const p = days.filter((d) => d === "P").length;
+  const a = days.filter((d) => d === "A").length;
+  const l = days.filter((d) => d === "L").length;
+  const h = days.filter((d) => d === "H").length;
+  const denom = p + a + l;
+  const pct = denom > 0 ? Math.round((p / denom) * 100) : 0;
+  return { p, a, l, h, pct };
+}
 
-  function handleGo() {
-    const from = new Date(fromDate)
-    const to = new Date(toDate)
+export default function Lecture_wise_AttendanceScreen() {
+  const [month, setMonth] = useState<number>(10);
+  const [year, setYear] = useState<number>(2025);
 
-    const inRange = (iso: string) => {
-      const d = new Date(iso)
-      return d >= from && d <= to
-    }
+  const daysInMonth = useMemo(() => getDaysInMonth(year, month), [year, month]);
+  const dayNumbers = useMemo(() => Array.from({ length: daysInMonth }, (_, i) => i + 1), [daysInMonth]);
 
-    const rows = SUBJECTS.map((s) => {
-      const entries = MOCK_DATA.filter((e) => e.subject === s && inRange(e.date))
-      const total = entries.reduce((sum, e) => sum + e.total, 0)
-      const present = entries.reduce((sum, e) => sum + e.present, 0)
-      return { subject: s, total, present }
-    })
-    setResults(rows)
-  }
+  const [courses, setCourses] = useState<CourseAttendance[]>(() => {
+    const empty = Array.from({ length: daysInMonth }, () => "" as AttendanceStatus);
+    return [
+      { course: "CSE607", days: [...empty] },
+      { course: "EN105", days: [...empty] },
+      { course: "MAT211", days: [...empty] },
+      { course: "PH308", days: [...empty] },
+    ];
+  });
 
-  const tableData = results.length ? results : SUBJECTS.map((s) => ({ subject: s, total: 0, present: 0 }))
+  // Reset courses when month/year changes
+  useMemo(() => {
+    const empty = Array.from({ length: daysInMonth }, () => "" as AttendanceStatus);
+    setCourses([
+      { course: "CSE607", days: [...empty] },
+      { course: "EN105", days: [...empty] },
+      { course: "MAT211", days: [...empty] },
+      { course: "PH308", days: [...empty] },
+    ]);
+  }, [daysInMonth]);
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>ATTENDANCE</Text>
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.title}>Attendance</Text>
 
-      {/* Filter Section */}
-      <View style={styles.filterCard}>
-        {/* From Date */}
-        <View style={styles.dateRow}>
-          <View style={styles.dateLabel}>
-            <Icon name="calendar-today" size={20} color="#000000ff" />
-            <Text style={styles.labelText}>From Date</Text>
-          </View>
-          <TextInput
-            style={styles.dateInput}
-            placeholder="YYYY-MM-DD"
-            value={fromDate}
-            onChangeText={setFromDate}
-          />
+      <View style={styles.filters}>
+        <View style={styles.pickerGroup}>
+          <Text style={styles.label}>Month</Text>
+          <Picker selectedValue={month} onValueChange={(v) => setMonth(v)} style={styles.picker}>
+            {MONTHS.map((m) => (
+              <Picker.Item key={m.value} label={m.label} value={m.value} />
+            ))}
+          </Picker>
         </View>
 
-        {/* To Date */}
-        <View style={[styles.dateRow, { borderTopWidth: 1, borderTopColor: "#ddd" }]}>
-          <View style={styles.dateLabel}>
-            <Icon name="calendar-today" size={20} color="#000000ff" />
-            <Text style={styles.labelText}>To Date</Text>
-          </View>
-          <TextInput
-            style={styles.dateInput}
-            placeholder="YYYY-MM-DD"
-            value={toDate}
-            onChangeText={setToDate}
-          />
+        <View style={styles.pickerGroup}>
+          <Text style={styles.label}>Year</Text>
+          <Picker selectedValue={year} onValueChange={(v) => setYear(v)} style={styles.picker}>
+            {YEARS.map((y) => (
+              <Picker.Item key={y} label={String(y)} value={y} />
+            ))}
+          </Picker>
         </View>
-
-        {/* GO Button */}
-        <TouchableOpacity style={styles.goButton} onPress={handleGo}>
-          <Text style={styles.goButtonText}>GO </Text>
-        </TouchableOpacity>
       </View>
 
-      {/* Table Section */}
-      <View style={styles.table}>
-        <View style={styles.tableHeader}>
-          <Text style={[styles.tableHeaderCell, { flex: 2 }]}>Subject</Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: "center" }]}>Total Lecture</Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: "center" }]}>Class Attd.</Text>
-        </View>
-
-        {tableData.map((row, idx) => (
-          <View
-            key={row.subject}
-            style={[
-              styles.tableRow,
-              { backgroundColor: idx % 2 === 0 ? "#fff" : "#f5f5f5" },
-            ]}
-          >
-            <Text style={[styles.tableCell, { flex: 2 }]}>{row.subject}</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: "center" }]}>{row.total}</Text>
-            <Text style={[styles.tableCell, { flex: 1, textAlign: "center" }]}>{row.present}</Text>
-          </View>
-        ))}
+      <View style={styles.legend}>
+        <Text style={styles.legendText}>
+          Present: <Text style={[styles.legendCode, styles.present]}>P</Text> |{" "}
+          Absent: <Text style={[styles.legendCode, styles.absent]}>A</Text> |{" "}
+          Leave: <Text style={[styles.legendCode, styles.leave]}>L</Text> |{" "}
+          Holiday: <Text style={[styles.legendCode, styles.holiday]}>H</Text>
+        </Text>
       </View>
-    </ScrollView>
-  )
+
+      <ScrollView horizontal showsHorizontalScrollIndicator style={{ flex: 1 }}>
+        <View>
+          {/* Header Row */}
+          <View style={[styles.row, styles.headerRow]}>
+            <View style={[styles.cellCourse, styles.headerCell]}>
+              <Text style={styles.headerText}>Course</Text>
+            </View>
+            {dayNumbers.map((d) => (
+              <View key={`hdr-${d}`} style={[styles.cellDay, styles.headerCell]}>
+                <Text style={styles.headerText}>{padDay(d)}</Text>
+              </View>
+            ))}
+            <View style={[styles.cellSummary, styles.headerCell]}>
+              <Text style={styles.headerText}>P</Text>
+            </View>
+            <View style={[styles.cellSummary, styles.headerCell]}>
+              <Text style={styles.headerText}>A</Text>
+            </View>
+            <View style={[styles.cellSummary, styles.headerCell]}>
+              <Text style={styles.headerText}>L</Text>
+            </View>
+            <View style={[styles.cellSummary, styles.headerCell]}>
+              <Text style={styles.headerText}>H</Text>
+            </View>
+            <View style={[styles.cellPct, styles.headerCell]}>
+              <Text style={styles.headerText}>%</Text>
+            </View>
+          </View>
+
+          {/* Body Rows */}
+          {courses.map((c) => {
+            const { p, a, l, h, pct } = summarize(c.days);
+            return (
+              <View key={c.course} style={styles.row}>
+                <View style={[styles.cellCourse, styles.bodyCell]}>
+                  <Text style={styles.bodyText}>{c.course}</Text>
+                </View>
+
+                {dayNumbers.map((d, idx) => {
+                  const val = c.days[idx] || "";
+                  const statusStyle =
+                    val === "P"
+                      ? styles.present
+                      : val === "A"
+                      ? styles.absent
+                      : val === "L"
+                      ? styles.leave
+                      : val === "H"
+                      ? styles.holiday
+                      : styles.empty;
+                  return (
+                    <View key={`${c.course}-${d}`} style={[styles.cellDay, styles.bodyCell]}>
+                      <Text style={[styles.bodyText, statusStyle]}>{val}</Text>
+                    </View>
+                  );
+                })}
+
+                <View style={[styles.cellSummary, styles.bodyCell]}>
+                  <Text style={styles.bodyText}>{p}</Text>
+                </View>
+                <View style={[styles.cellSummary, styles.bodyCell]}>
+                  <Text style={styles.bodyText}>{a}</Text>
+                </View>
+                <View style={[styles.cellSummary, styles.bodyCell]}>
+                  <Text style={styles.bodyText}>{l}</Text>
+                </View>
+                <View style={[styles.cellSummary, styles.bodyCell]}>
+                  <Text style={styles.bodyText}>{h}</Text>
+                </View>
+                <View style={[styles.cellPct, styles.bodyCell]}>
+                  <Text style={styles.bodyText}>{pct} %</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f9fafb" },
-  header: {
-    backgroundColor: "#fcfcfcff",
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-  headerTitle: { fontSize: 22, fontWeight: "700", color: "#000000ff" },
+  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  title: { fontSize: 20, fontWeight: "600", marginBottom: 12 },
+  filters: { flexDirection: "row", gap: 12, marginBottom: 12 },
+  pickerGroup: { flex: 1 },
+  label: { fontSize: 12, color: "#000000ff", marginBottom: 6 },
+  picker: { backgroundColor: "#f2f2f2", borderRadius: 6 },
 
-  filterCard: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    marginTop: -20,
-    borderRadius: 12,
-    paddingVertical: 10,
-    elevation: 2,
-    color:"#000000ff"
-  },
-  dateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  dateLabel: { flexDirection: "row", alignItems: "center", gap: 8 },
-  labelText: { fontSize: 15, color: "#000000ff", marginLeft: 6 },
-  dateInput: {
-    borderWidth: 1,
-    borderColor: "#070606ff",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    width: 120,
-    textAlign: "center",
-    fontSize: 14,
-  },
-  goButton: {
-    alignSelf: "flex-end",
-    backgroundColor: "#d6d8dbff",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    marginRight: 16,
-    marginTop: 8,
-  },
-  goButtonText: { color: "#000000ff", fontWeight: "600" },
+  legend: { marginBottom: 8 },
+  legendText: { color: "#333" },
+  legendCode: { fontWeight: "700" },
+  present: { color: "#2563eb" },
+  absent: { color: "#dc2626" },
+  leave: { color: "#16a34a" },
+  holiday: { color: "#d97706" },
+  empty: { color: "#666" },
 
-  table: {
-    backgroundColor: "#fff",
-    marginHorizontal: 10,
-    marginTop: 20,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#050404ff",
-  },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#ffe7e7ff",
-    paddingVertical: 10,
-  },
-  tableHeaderCell: {
-    color: "#000000ff",
-    fontWeight: "700",
-    fontSize: 13,
-    paddingHorizontal: 8,
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  tableCell: {
-    fontSize: 13,
-    color: "#000000ff",
-    paddingHorizontal: 8,
-  },
-})
+  row: { flexDirection: "row" },
+  headerRow: { backgroundColor: "#91a4e4ff" },
+  headerCell: { paddingVertical: 8, paddingHorizontal: 6, borderWidth: 1, borderColor: "#334155" },
+  headerText: { color: "#000000ff", fontWeight: "600", textAlign: "center" },
+
+  bodyCell: { paddingVertical: 10, paddingHorizontal: 6, borderWidth: 1, borderColor: "#030305ff" },
+  bodyText: { color: "#111827", textAlign: "center" },
+
+  cellCourse: { width: 96, justifyContent: "center" },
+  cellDay: { width: 44, justifyContent: "center" },
+  cellSummary: { width: 44, justifyContent: "center" },
+  cellPct: { width: 64, justifyContent: "center" },
+});

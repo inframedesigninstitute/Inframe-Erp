@@ -36,18 +36,18 @@ const menuData = [
     icon: "group",
     children: [
       { label: "Student_Dashboard", path: "students/Student_Dashboard" },
-      { label: "Time_Table", path: "Students/Student List" },
+      { label: "Time_Table", path: "students/TimeTableScreen" },
       {
         label: "Attendance",
         path: "Students/Reports",
         children: [
-          { label: "Subject Attendance", path: "Students/SubjectAttendance" },
-          { label: "Monthly Attendance", path: "Students/Reports/MonthlyAttendance" },
-          { label: "Daily Attendance", path: "Students/Reports/DailyAttendance" }
+          { label: "Subject Attendance", path: "students/Subject_Attendance" },
+          { label: "Monthly Attendance", path: "students/Monthly_AttendanceScreen" },
+          { label: "Daily Attendance", path: "students/Lecture_wise_AttendanceScreen" }
         ]},
            { label: "Assignment", path: "Students/Assignment" },
           { label: "ProfileScreen", path: "students/ProfileScreen" },
-           { label: "COUSERS", path: "Students/COUSERS" },
+           { label: "COUSERS", path: "students/CousersScreen" },
 
         
     ]

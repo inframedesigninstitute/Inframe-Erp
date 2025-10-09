@@ -1,180 +1,272 @@
-import { useMemo, useState } from "react"
 import {
-    FlatList,
-    Modal,
-    Platform,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native"
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 
 type ClassItem = {
-  subject: string
-  teacher: string
-  time: string
+  code: string
+  times: string[] // e.g., ["05:37 AM", "06:37 AM"]
   room: string
-  day: string
-  color: string
+  instructor: string
 }
 
-const BASE: ClassItem[] = [
-  { subject: "Art & Sketching", teacher: "Mr. Sharma", time: "09:00 AM - 10:00 AM", room: "A101", day: "Monday", color: "#FDE68A" },
-  { subject: "Photography Basics", teacher: "Ms. Nisha", time: "10:15 AM - 11:15 AM", room: "Studio 2", day: "Monday", color: "#BFDBFE" },
-  { subject: "English Communication", teacher: "Mr. Ravi", time: "11:30 AM - 12:30 PM", room: "B203", day: "Tuesday", color: "#C7D2FE" },
-  { subject: "Interior Design Concepts", teacher: "Ms. Pooja", time: "01:30 PM - 02:30 PM", room: "Design Lab", day: "Wednesday", color: "#FECACA" },
-  { subject: "Advanced Art Workshop", teacher: "Mr. Roy", time: "09:00 AM - 10:30 AM", room: "A102", day: "Thursday", color: "#A7F3D0" },
-  { subject: "Creative Photography", teacher: "Ms. Rhea", time: "10:45 AM - 12:00 PM", room: "Studio 1", day: "Friday", color: "#FBCFE8" },
-  { subject: "Interior Design Studio", teacher: "Ms. Sneha", time: "01:00 PM - 02:30 PM", room: "Lab 3", day: "Friday", color: "#FCD34D" },
+type Day = {
+  name: string
+  classes: ClassItem[]
+}
+
+const DAYS: Day[] = [
+  {
+    name: 'Saturday',
+    classes: [
+      {
+        code: 'EN105',
+        times: ['05:37 AM', '06:37 AM'],
+        room: 'Room: 205B',
+        instructor: 'Emmanuel Harmon',
+      },
+      {
+        code: 'MAT211',
+        times: ['07:37 AM', '08:37 AM'],
+        room: 'Room: 306A',
+        instructor: 'Meredith Hancock',
+      },
+    ],
+  },
+  { name: 'Sunday', classes: [] },
+  {
+    name: 'Monday',
+    classes: [
+      {
+        code: 'CSE607',
+        times: ['05:38 AM', '06:38 AM'],
+        room: 'Room: 202B',
+        instructor: 'Daphne Padilla',
+      },
+      {
+        code: 'PH308',
+        times: ['06:38 AM', '07:38 AM'],
+        room: 'Room: 305A',
+        instructor: 'Zorita Rivas',
+      },
+    ],
+  },
+  { name: 'Tuesday', classes: [] },
+  {
+    name: 'Wednesday',
+    classes: [
+      {
+        code: 'EN105',
+        times: ['05:39 AM', '06:39 AM'],
+        room: 'Room: 305A',
+        instructor: 'Emmanuel Harmon',
+      },
+      {
+        code: 'MAT211',
+        times: ['06:39 AM', '07:39 AM'],
+        room: 'Room: 205B',
+        instructor: 'Daphne Padilla',
+      },
+    ],
+  },
+  { name: 'Thursday', classes: [] },
+  { name: 'Friday', classes: [] },
 ]
 
-const TIMETABLE: ClassItem[] = Array.from({ length: 20 }).flatMap((_, i) =>
-  BASE.map((b, j) => ({ ...b, subject: `${b.subject} ${i + 1}-${j + 1}` }))
-)
+const COLUMN_WIDTH = 160
+const COLORS = {
+  bg: '#e9f2ff',
+  cardBg: '#ffffff',
+  headerBlue: '#3ba0e6',
+  tileBlue: '#2d8dd8',
+  textDark: '#0f172a',
+  textLight: '#ffffff',
+  border: '#e6eef7',
+}
 
-export default function TimeTableScreen() {
-  const [selectedItem, setSelectedItem] = useState<ClassItem | null>(null)
-  const [modalVisible, setModalVisible] = useState(false)
-
-  const header = useMemo(
-    () => (
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>🎓 Student Time Table</Text>
-        <Text style={styles.headerSubtitle}>Creative Arts & Design Department</Text>
-      </View>
-    ),
-    []
-  )
-
-  const renderItem = ({ item }: { item: ClassItem }) => (
-    <View style={[styles.card, { backgroundColor: item.color }]}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.subject} numberOfLines={2}>
-          {item.subject}
+function DayColumn({ day }: { day: Day }) {
+  return (
+    <View style={[styles.dayColumn, { width: COLUMN_WIDTH }]}>
+      <View style={styles.dayHeader}>
+        <Text numberOfLines={1} style={styles.dayHeaderText}>
+          {day.name}
         </Text>
-        <View style={styles.dayBadge}>
-          <Text style={styles.dayText}>{item.day}</Text>
-        </View>
       </View>
 
-      <View style={styles.infoRow}>
-        <Icon name="account-outline" size={18} color="#374151" style={styles.icon} />
-        <Text style={styles.infoText}>{item.teacher}</Text>
+      <View style={styles.dayBody}>
+        {day.classes.length === 0 ? (
+          <View style={styles.emptySlot} />
+        ) : (
+          day.classes.map((c, idx) => (
+            <View key={c.code + idx} style={styles.classCard}>
+              <Text style={styles.classCode}>{c.code}</Text>
+              {c.times.map((t, i) => (
+                <Text key={t + i} style={styles.classLine}>
+                  {t}
+                </Text>
+              ))}
+              <Text style={styles.classLine}>{c.room}</Text>
+              <Text style={styles.classLine}>{c.instructor}</Text>
+            </View>
+          ))
+        )}
       </View>
-
-      <View style={styles.infoRow}>
-        <Icon name="clock-outline" size={18} color="#374151" style={styles.icon} />
-        <Text style={styles.infoText}>{item.time}</Text>
-      </View>
-
-      <View style={styles.infoRow}>
-        <Icon name="map-marker-outline" size={18} color="#374151" style={styles.icon} />
-        <Text style={styles.infoText}>{item.room}</Text>
-      </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          setSelectedItem(item)
-          setModalVisible(true)
-        }}
-      >
-        <Text style={styles.buttonText}>View Details</Text>
-      </TouchableOpacity>
     </View>
   )
+}
 
+export default function TimeTableScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <FlatList
-        data={TIMETABLE}
-        keyExtractor={(_, idx) => String(idx)}
-        renderItem={renderItem}
-        ListHeaderComponent={header}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={true}
-      />
-
-      {/* Modal */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContent}>
-            {selectedItem && (
-              <>
-                <Text style={styles.modalTitle}>{selectedItem.subject}</Text>
-                <Text style={styles.modalText}>Teacher: {selectedItem.teacher}</Text>
-                <Text style={styles.modalText}>Time: {selectedItem.time}</Text>
-                <Text style={styles.modalText}>Room: {selectedItem.room}</Text>
-                <Text style={styles.modalText}>Day: {selectedItem.day}</Text>
-              </>
-            )}
-            <TouchableOpacity
-              style={[styles.button, { alignSelf: "center", marginTop: 20 }]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.container}>
+        {/* Title */}
+        <View style={styles.titleRow}>
+          <View style={styles.titleAccent} />
+          <Text style={styles.title}>Class Schedule</Text>
         </View>
-      </Modal>
+
+        {/* Columns scroller */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.columns}
+        >
+          {/* Continuous blue header bar effect */}
+          <View style={[styles.headerRail, { width: COLUMN_WIDTH * DAYS.length }]}>
+            {DAYS.map((d) => (
+              <View
+                key={d.name}
+                style={[styles.headerRailCell, { width: COLUMN_WIDTH }]}
+              />
+            ))}
+          </View>
+
+          {/* Actual columns */}
+          {DAYS.map((d) => (
+            <DayColumn key={d.name} day={d} />
+          ))}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#F9FAFB" },
-  contentContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: Platform.select({ ios: 80, android: 100 }),
-  },
-  header: { marginBottom: 12 },
-  headerTitle: { fontSize: 26, fontWeight: "700", color: "#111827" },
-  headerSubtitle: { fontSize: 15, color: "#6B7280", marginTop: 4 },
-  card: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: "#000",
-    
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  subject: { fontSize: 18, fontWeight: "700", color: "#111827", flex: 1 },
-  dayBadge: { backgroundColor: "#1E3A8A", borderRadius: 12, paddingVertical: 4, paddingHorizontal: 10 },
-  dayText: { color: "#fff", fontSize: 12, fontWeight: "600" },
-  infoRow: { flexDirection: "row", alignItems: "center", marginTop: 6 },
-  icon: { marginRight: 8 },
-  infoText: { fontSize: 14, color: "#374151" },
-  button: { marginTop: 12, alignSelf: "flex-end", backgroundColor: "#1E3A8A", paddingVertical: 6, paddingHorizontal: 14, borderRadius: 10 },
-  buttonText: { color: "#fff", fontSize: 13, fontWeight: "600" },
-
-  modalBackground: {
+  safe: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#ffffff', // pure white background
+    padding: 12,
   },
-  modalContent: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 16,
-    width: "80%",
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff', // white background
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#151618ff',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        // shadowOpacity: 0.08,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 4 },
+      },
+      android: { elevation: 3 },
+    }),
   },
-  modalTitle: { fontSize: 20, fontWeight: "700", marginBottom: 10 },
-  modalText: { fontSize: 16, marginVertical: 2 },
-})
+  titleRow: {
+    
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    marginBottom: 12,
+    backgroundColor: '#ffffffff', // white header
+    borderRadius: 4, color:"#000", borderColor:"#000",
+    borderBottomColor:"#000"
+  },
+  titleAccent: {
+    width: 25,
+    height: 24,
+    backgroundColor: '#0a0a0aff', // white accent
+    borderRadius: 2,
+    marginRight: 8, 
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000000', borderColor:"#000", 
+  },
+  columns: {
+    paddingBottom: 30, borderRightWidth: 1,
+    
+  },
+  headerRail: {
+    position: 'absolute',
+    top: 6,
+    left: 8,
+    right: 8,
+    height: 36,
+    backgroundColor: '#f1efefff', 
+    borderRadius: 4,borderColor:"#000",  borderRightWidth: 1,
+  },
+  headerRailCell: {
+    height: '100%',
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(0,0,0,0.1)',   
+  },
+  dayColumn: {
+    marginTop: 2,
+    marginHorizontal: 8, marginLeft:20
+
+  },
+  dayHeader: {
+    backgroundColor: 'transparent',
+    height: 36,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  dayHeaderText: {
+    color: '#000000', // black text
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  dayBody: {
+    paddingTop: 8,
+    paddingBottom: 4,
+    minHeight: 240,
+    justifyContent: 'flex-start',
+    gap: 10 as any,
+  },
+  emptySlot: {
+    height: 120,
+    borderWidth: 1,
+    borderColor: '#000000ff',
+    borderStyle: 'dashed',
+    borderRadius: 6,
+  },
+  classCard: {
+    backgroundColor: '#ffffff', // white card
+    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    minWidth: COLUMN_WIDTH + 16,
+    borderWidth: 1,
+    borderColor: '#000000ff',
+  },
+  classCode: {
+    color: '#000000', // black text
+    fontWeight: '700',
+    marginBottom: 6,
+    fontSize: 15,
+  },
+  classLine: {
+    color: '#000000ff', // black text
+    marginTop: 2,
+    fontSize: 13,
+  },
+});
