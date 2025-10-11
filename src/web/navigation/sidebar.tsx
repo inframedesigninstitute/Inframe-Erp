@@ -14,49 +14,41 @@ import { theme } from "../theme";
 
 const menuData = [
   {
-    label: "Dashboard",
-    icon: "dashboard",
-    children: [
-      { label: "Overview", path: "Dashboard" },
-      { label: "Stats", path: "Dashboard/Stats" },
-      { label: "Performance", path: "Dashboard/Performance" },
-    ],
-  },
-  {
-    label: "Admission",
-    icon: "person-add",
-    children: [
-      { label: "New Admission", path: "Admission/New Registration" },
-      { label: "View Students", path: "Admission/Student List" },
-      { label: "Admission Report", path: "Admission/Reports" },
-    ],
-  },
-  {
-    label: "Students",
-    icon: "group",
-    children: [
-      { label: "Student_Dashboard", path: "students/Student_Dashboard" },
-      { label: "Time_Table", path: "students/TimeTableScreen" },
-      {
-        label: "Attendance",
-        path: "Students/Reports",
-        children: [
-          { label: "Subject Attendance", path: "students/Subject_Attendance" },
-          { label: "Monthly Attendance", path: "students/Monthly_AttendanceScreen" },
-          { label: "Daily Attendance", path: "students/Lecture_wise_AttendanceScreen" }
-        ]},
-           { label: "Assignment", path: "Students/Assignment" },
-          { label: "ProfileScreen", path: "students/ProfileScreen" },
-           { label: "COUSERS", path: "students/CousersScreen" },
+    label: "Dashboard", icon: "dashboard", path: "Dashboard" },
+    { label: "Class Schedule", path: "students/TimeTableScreen" },
+    { label: "Exam Schedule", path: "ExamScheduleScreen" },
+    { label: "Attendances", path: "students/Lecture_wise_AttendanceScreen" },
+    { label: "Apply Leave", path: "LeaveApplication" },
+      { label: "Fees Report", path: "FeesReport" },
+     { label: "Library", icon: "menu-book", path: "Library" },
+
+
+  // {
+  //   label: "Students",
+  //   icon: "group",
+  //   children: [
+  //     { label: "Student_Dashboard", path: "students/Student_Dashboard" },
+  //     { label: "Time_Table", path: "students/TimeTableScreen" },
+  //     {
+  //       label: "Attendance",
+  //       path: "Students/Reports",
+  //       children: [
+  //         { label: "Subject Attendance", path: "students/Subject_Attendance" },
+  //         { label: "Monthly Attendance", path: "students/Monthly_AttendanceScreen" },
+  //         { label: "Daily Attendance", path: "students/Lecture_wise_AttendanceScreen" }
+  //       ]},
+  //          { label: "Assignment", path: "Students/Assignment" },
+  //         { label: "ProfileScreen", path: "students/ProfileScreen" },
+  //          { label: "COUSERS", path: "students/CousersScreen" },
 
         
-    ]
-  },
-  { label: "Fees Collection", icon: "payments", children: [
-      { label: "Fee Types", path: "Fees Collection/Fee Types" },
-      { label: "Payments", path: "Fees Collection/Payments" },
-      { label: "Due Reports", path: "Fees Collection/Due Reports" },
-  ]},
+  //   ]
+  // },
+  // { label: "Fees Collection", icon: "payments", children: [
+  //     { label: "Fee Types", path: "Fees Collection/Fee Types" },
+  //     { label: "Payments", path: "Fees Collection/Payments" },
+  //     { label: "Due Reports", path: "Fees Collection/Due Reports" },
+  // ]},
   { label: "Reports", icon: "bar-chart", path: "Reports" },
   { label: "Communicates", icon: "chat", path: "Communicates" },
   { label: "Library", icon: "menu-book", path: "Library" },

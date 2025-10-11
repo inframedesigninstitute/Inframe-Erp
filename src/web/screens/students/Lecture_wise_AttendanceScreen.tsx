@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   picker: { backgroundColor: "#f2f2f2", borderRadius: 6 },
 
   legend: { marginBottom: 8 },
-  legendText: { color: "#333" },
+  legendText: { color: "#000000ff" },
   legendCode: { fontWeight: "700" },
   present: { color: "#2563eb" },
   absent: { color: "#dc2626" },

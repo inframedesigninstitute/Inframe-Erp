@@ -1,64 +1,131 @@
-import { Dimensions, Platform, StyleSheet, View, ViewStyle } from "react-native";
-import ChartCard from "../components/chart-card";
-import KpiCard from "../components/kpi-card";
-import { ScrollArea } from "../components/ui/scroll-area"; // correct path
-import { theme } from "../theme";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { CalendarInput } from "../components/ui/CalendarInput";
 
-const { height: screenHeight } = Dimensions.get("window");
-
-export default function Dashboard() {
+const NewAdmissionScreen = () => {
   return (
-    <View style={[styles.wrapper, Platform.OS === "web" && styles.webWrapper]}>
-      <ScrollArea style={{ flex: 1, height: "100%" }}>
-        <View style={styles.container}>
-          {/* KPI Tiles */}
-          <View style={styles.kpiGrid}>
-            <KpiCard title="Pending Applications" value={3} color="aqua" />
-            <KpiCard title="Active Students" value={22} color="blue" />
-            <KpiCard title="Active Staffs" value={11} color="cyan" />
-            <KpiCard title="Daily Visitor Logs" value={0} color="teal" />
-          </View>
-          {/* Big Line Chart Card */}
-          <ChartCard title="Student Fees • Salary Paid • Incomes • Expenses" />
+    <ScrollView style={styles.container}>
+   
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Assignments</Text>
 
-          {/* Lower Row of Cards */}
-          <View style={styles.lowerGrid}>
-            <ChartCard title="Students" />
-            <ChartCard title="Fees Collections" />
+    
+        <View style={[styles.tableRow, styles.tableHeader]}>
+          <Text style={[styles.tableCell, styles.tableHeaderText, { flex: 2 }]}>
+            Title
+          </Text>
+          <Text style={[styles.tableCell, styles.tableHeaderText]}>Course</Text>
+          <Text style={[styles.tableCell, styles.tableHeaderText]}>Status</Text>
+        </View>
+
+       
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableCell, { flex: 2 }]}>Rules of voice change</Text>
+          <Text style={styles.tableCell}>EN105</Text>
+          <View style={styles.statusCell}>
+            <Text style={[styles.statusBadge, styles.submitted]}>Submitted</Text>
           </View>
         </View>
-      </ScrollArea>
-    </View>
+
+        {/* Table Row 2 */}
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableCell, { flex: 2 }]}>Rules of Article</Text>
+          <Text style={styles.tableCell}>EN105</Text>
+          <View style={styles.statusCell}>
+            <Text style={[styles.statusBadge, styles.pending]}>Pending</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Calendar + Upcoming Event */}
+      <View style={styles.row}>
+        <View style={[styles.card, { flex: 2 }]}>
+          <Text style={styles.sectionTitle}>Calendar</Text>
+          {/* Using your existing CalendarInput component */}
+          <CalendarInput label="Select Date" />
+        </View>
+
+        <View style={[styles.card, { flex: 1 }]}>
+          <Text style={styles.sectionTitle}>Upcoming Event</Text>
+          <Text style={styles.emptyText}>No upcoming events</Text>
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+export default NewAdmissionScreen;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    backgroundColor: theme.colors.appbarFg || "#f9f9f9",
-    height: screenHeight,
-  },
-  webWrapper: {
-    height: "100%",
-    overflowY: "auto" as ViewStyle["overflow"],
-  },
   container: {
-    padding: 5,
-    gap: theme.layout.gapLg || 12,
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: "#f5f8ff",
+    padding: 10,
   },
-  kpiGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: theme.layout.gap || 12,
-    marginBottom: theme.layout.gapLg || 12,
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    marginBottom: 16,
+    padding: 10,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
-  lowerGrid: {
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    borderLeftWidth: 3,
+    borderLeftColor: "#2196f3",
+    paddingLeft: 8,
+    marginBottom: 10,
+  },
+  tableRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: theme.layout.gap || 12,
-    marginTop: theme.layout.gapLg || 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    alignItems: "center",
+    paddingVertical: 8,
+    backgroundColor: "#f9fbff",
+  },
+  tableHeader: {
+    backgroundColor: "#2196f3",
+  },
+  tableHeaderText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  tableCell: {
+    flex: 1,
+    fontSize: 14,
+    color: "#000",
+    paddingHorizontal: 8,
+  },
+  statusCell: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statusBadge: {
+    fontSize: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+    color: "#fff",
+    overflow: "hidden",
+  },
+  submitted: {
+    backgroundColor: "#4CAF50",
+  },
+  pending: {
+    backgroundColor: "#2196f3",
+  },
+  row: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  emptyText: {
+    color: "#777",
+    fontSize: 14,
+    marginTop: 10,
   },
 });

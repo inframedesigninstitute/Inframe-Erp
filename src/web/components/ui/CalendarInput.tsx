@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { Calendar } from "./ui/calendar"; // 👈 Correct import here!
+import { Calendar } from "./calendar"; // 👈 Correct import here!
 
 type CalendarInputProps = {
   label?: string
@@ -46,7 +46,7 @@ export function CalendarInput({
           <Calendar
             mode="single"
             selected={date}
-           
+          
             onSelect={handleSelect}
           />
         </View>

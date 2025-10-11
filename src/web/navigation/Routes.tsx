@@ -1,7 +1,9 @@
 import React from "react"
-import NewAdmissionScreen from "../screens/admission/NewAdmissionScreen"
 import Dashboard from "../screens/dashboard"
+import ExamScheduleScreen from "../screens/ExamScheduleScreen"
+import FeesReport from "../screens/FeesReport"
 import GenericScreen from "../screens/generic-screen"
+import LeaveApplication from "../screens/LeaveApplication"
 import CousersScreen from "../screens/students/CousersScreen"
 import Lecture_wise_AttendanceScreen from "../screens/students/Lecture_wise_AttendanceScreen"
 import Monthly_AttendanceScreen from "../screens/students/Monthly_AttendanceScreen"
@@ -14,7 +16,8 @@ export const ROUTES: string[] = [
   "Dashboard",
   "Admission",
   "Admission/Applications",
-  "Admission/New Registration",
+  "ExamScheduleScreen",
+  "LeaveApplication",
   "Admission/Student List",
   "Admission/Transfers",
   "Admission/Transfers/Transfer In",
@@ -24,7 +27,7 @@ export const ROUTES: string[] = [
   "Admission/Settings",
   "students/Student_Dashboard",
   "students/Subject_Attendance",
-  "students/Lecture_wise_AttendanceScreen", // ✅ no leading space
+  "students/Lecture_wise_AttendanceScreen", 
   "students/Monthly_AttendanceScreen", 
   "students/CousersScreen",
    "students/TimeTableScreen",
@@ -49,13 +52,13 @@ export const ROUTES: string[] = [
   "Front Web",
   "Settings",
   "My Profile",
+  "FeesReport"
 ]
 
 export function getScreenForRoute(key: string): React.ReactElement {
   console.log("Selected route:", key)
 
   if (key === "Dashboard") return <Dashboard />
-  if (key === "Admission/New Registration") return <NewAdmissionScreen />
   if (key === "students/Student_Dashboard") return <Student_Dashboard />
   if (key === "students/Subject_Attendance") return <Subject_Attendance />
   if (key === "students/Lecture_wise_AttendanceScreen") return <Lecture_wise_AttendanceScreen />
@@ -63,6 +66,9 @@ export function getScreenForRoute(key: string): React.ReactElement {
   if (key === "students/CousersScreen") return <CousersScreen />
   if (key === "students/TimeTableScreen") return <TimeTableScreen />
   if (key === "students/ProfileScreen") return <ProfileScreen />
+  if (key === "ExamScheduleScreen") return <ExamScheduleScreen />
+  if (key === "LeaveApplication") return <LeaveApplication />
+  if (key === "FeesReport") return <FeesReport />
 
 
   return <GenericScreen title={key} />
