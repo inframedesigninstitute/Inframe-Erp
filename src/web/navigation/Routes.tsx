@@ -1,9 +1,13 @@
 import React from "react"
+import AssignmentListScreen from "../screens/AssignmentList"
 import Dashboard from "../screens/dashboard"
+import DownloadListScreen from "../screens/DownloadListScreen"
 import ExamScheduleScreen from "../screens/ExamScheduleScreen"
 import FeesReport from "../screens/FeesReport"
 import GenericScreen from "../screens/generic-screen"
 import LeaveApplication from "../screens/LeaveApplication"
+import LibraryInventoryTable from "../screens/LibraryInventoryTable"
+import NoticeBoardScreen from "../screens/NoticeBoardScreen"
 import CousersScreen from "../screens/students/CousersScreen"
 import Lecture_wise_AttendanceScreen from "../screens/students/Lecture_wise_AttendanceScreen"
 import Monthly_AttendanceScreen from "../screens/students/Monthly_AttendanceScreen"
@@ -11,6 +15,7 @@ import ProfileScreen from "../screens/students/ProfileScreen"
 import Student_Dashboard from "../screens/students/Student_Dashboard"
 import Subject_Attendance from "../screens/students/Subject_Attendance"
 import TimeTableScreen from "../screens/students/TimeTableScreen"
+import StudentTranscript from "../screens/StudentTranscript"
 
 export const ROUTES: string[] = [
   "Dashboard",
@@ -52,7 +57,12 @@ export const ROUTES: string[] = [
   "Front Web",
   "Settings",
   "My Profile",
-  "FeesReport"
+  "FeesReport",
+  "LibraryInventoryTable",
+  "NoticeBoardScreen",
+  "AssignmentListScreen",
+  "DownloadListScreen",
+  "StudentTranscript",
 ]
 
 export function getScreenForRoute(key: string): React.ReactElement {
@@ -69,6 +79,11 @@ export function getScreenForRoute(key: string): React.ReactElement {
   if (key === "ExamScheduleScreen") return <ExamScheduleScreen />
   if (key === "LeaveApplication") return <LeaveApplication />
   if (key === "FeesReport") return <FeesReport />
+  if (key === "LibraryInventoryTable") return <LibraryInventoryTable />
+  if (key === "NoticeBoardScreen") return <NoticeBoardScreen />
+  if (key === "AssignmentListScreen") return <AssignmentListScreen />
+  if (key === "DownloadListScreen") return <DownloadListScreen />
+  if (key === "StudentTranscript") return <StudentTranscript />
 
 
   return <GenericScreen title={key} />

@@ -1,3 +1,4 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   Platform,
@@ -10,17 +11,21 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 import { useNav } from "../contexts/nav-context";
-import { theme } from "../theme";
 
 const menuData = [
-  {
-    label: "Dashboard", icon: "dashboard", path: "Dashboard" },
-    { label: "Class Schedule", path: "students/TimeTableScreen" },
-    { label: "Exam Schedule", path: "ExamScheduleScreen" },
-    { label: "Attendances", path: "students/Lecture_wise_AttendanceScreen" },
-    { label: "Apply Leave", path: "LeaveApplication" },
-      { label: "Fees Report", path: "FeesReport" },
-     { label: "Library", icon: "menu-book", path: "Library" },
+   { label: "Dashboard", icon: "dashboard", iconType: MaterialIcons, path: "Dashboard" },
+  { label: "Class Schedule", icon: "event", iconType: MaterialIcons, path: "students/TimeTableScreen" },
+  { label: "Exam Schedule", icon: "assignment", iconType: MaterialIcons, path: "ExamScheduleScreen" },
+  { label: "Attendances", icon: "check-circle", iconType: MaterialIcons, path: "students/Lecture_wise_AttendanceScreen" },
+  { label: "Apply Leaves", icon: "edit", iconType: MaterialIcons, path: "LeaveApplication" }, // 'edit' or 'create' for pencil icon
+  { label: "Fees Report", icon: "receipt", iconType: MaterialIcons, path: "FeesReport" },
+  { label: "Library", icon: "book", iconType: MaterialIcons, path: "LibraryInventoryTable" },
+  { label: "Notices", icon: "campaign", iconType: MaterialIcons, path: "NoticeBoardScreen" }, // 'campaign' or 'volume_up' for loudspeaker/notice icon
+  { label: "Assignments", icon: "assignment", iconType: MaterialIcons, path: "AssignmentListScreen" }, // For paper with lines icon
+  { label: "Download", icon: "file-download", iconType: MaterialIcons, path: "DownloadListScreen" },
+  { label: "Transcript", icon: "description", iconType: MaterialIcons, path: "StudentTranscript" }, // For 'Transcript' or 'paper' like icon
+  { label: "My Profile", icon: "person", iconType: MaterialIcons, path: "My Profile" },
+  { label: "Transports", icon: "local-taxi", path: "Transports" },
 
 
   // {
@@ -45,21 +50,20 @@ const menuData = [
   //   ]
   // },
   // { label: "Fees Collection", icon: "payments", children: [
-  //     { label: "Fee Types", path: "Fees Collection/Fee Types" },
+  //     { label: "Fee Types", path: "Fees Collection/Fee Types" },Download
   //     { label: "Payments", path: "Fees Collection/Payments" },
   //     { label: "Due Reports", path: "Fees Collection/Due Reports" },
   // ]},
-  { label: "Reports", icon: "bar-chart", path: "Reports" },
-  { label: "Communicates", icon: "chat", path: "Communicates" },
-  { label: "Library", icon: "menu-book", path: "Library" },
-  { label: "Inventory", icon: "inventory", path: "Inventory" },
-  { label: "Hostels", icon: "hotel", path: "Hostels" },
-  { label: "Transports", icon: "local-taxi", path: "Transports" },
-  { label: "Front Desk", icon: "room-service", path: "Front Desk" },
-  { label: "Transcripts", icon: "description", path: "Transcripts" },
-  { label: "Front Web", icon: "web", path: "Front Web" },
-  { label: "My Profile", icon: "person", path: "My Profile" },
-  { label: "Settings", icon: "settings", path: "Settings" },
+  // { label: "Reports", icon: "bar-chart", path: "Reports" },
+  // { label: "Communicates", icon: "chat", path: "Communicates" },
+  // { label: "Inventory", icon: "inventory", path: "Inventory" },
+  // { label: "Hostels", icon: "hotel", path: "Hostels" },
+  // { label: "Transports", icon: "local-taxi", path: "Transports" },
+  // { label: "Front Desk", icon: "room-service", path: "Front Desk" },
+  // { label: "Transcripts", icon: "description", path: "Transcripts" },
+  // { label: "Front Web", icon: "web", path: "Front Web" },
+  // { label: "My Profile", icon: "person", path: "My Profile" },
+  // { label: "Settings", icon: "settings", path: "Settings" },
 ];
 
 export default function Sidebar() {
@@ -142,7 +146,8 @@ export default function Sidebar() {
 
 const styles = StyleSheet.create({
   sidebar: {
-    width: theme.layout.sidebarWidth,
+   
+    width:"28%",
     backgroundColor: "#f8f1f1ff",
     height: "100%",
     padding: 12,
@@ -163,7 +168,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   scrollArea: {
-    flex: 1,
+    flex: 1, 
+height: "100%",
     ...Platform.select({
       web: {
         overflowY: "auto",
