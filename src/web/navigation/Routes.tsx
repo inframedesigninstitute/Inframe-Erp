@@ -8,6 +8,7 @@ import GenericScreen from "../screens/generic-screen"
 import LeaveApplication from "../screens/LeaveApplication"
 import LibraryInventoryTable from "../screens/LibraryInventoryTable"
 import NoticeBoardScreen from "../screens/NoticeBoardScreen"
+import RequestStatusScreen from "../screens/RequestStatusScreen"
 import CousersScreen from "../screens/students/CousersScreen"
 import Lecture_wise_AttendanceScreen from "../screens/students/Lecture_wise_AttendanceScreen"
 import Monthly_AttendanceScreen from "../screens/students/Monthly_AttendanceScreen"
@@ -62,7 +63,7 @@ export const ROUTES: string[] = [
   "NoticeBoardScreen",
   "AssignmentListScreen",
   "DownloadListScreen",
-  "StudentTranscript",
+  "StudentTranscript","RequestStatusScreen",
 ]
 
 export function getScreenForRoute(key: string): React.ReactElement {
@@ -84,6 +85,7 @@ export function getScreenForRoute(key: string): React.ReactElement {
   if (key === "AssignmentListScreen") return <AssignmentListScreen />
   if (key === "DownloadListScreen") return <DownloadListScreen />
   if (key === "StudentTranscript") return <StudentTranscript />
+  if (key === "RequestStatusScreen") return <RequestStatusScreen />
 
 
   return <GenericScreen title={key} />

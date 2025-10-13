@@ -1,272 +1,178 @@
-import {
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
+// TimeTableScreen.tsx
+import React from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import LinearGradient from 'react-native-web-linear-gradient'; // Works for web & mobile
 
-type ClassItem = {
-  code: string
-  times: string[] // e.g., ["05:37 AM", "06:37 AM"]
-  room: string
-  instructor: string
+// --- Type Definitions ---
+interface ClassItem {
+  code: string;
+  subject: string;
+  time: string;
+  room: string;
+  instructor: string;
+  color: string;
 }
 
-type Day = {
-  name: string
-  classes: ClassItem[]
+interface Day {
+  name: string;
+  classes: ClassItem[];
 }
 
 const DAYS: Day[] = [
-  {
-    name: 'Saturday',
-    classes: [
-      {
-        code: 'EN105',
-        times: ['05:37 AM', '06:37 AM'],
-        room: 'Room: 205B',
-        instructor: 'Emmanuel Harmon',
-      },
-      {
-        code: 'MAT211',
-        times: ['07:37 AM', '08:37 AM'],
-        room: 'Room: 306A',
-        instructor: 'Meredith Hancock',
-      },
-    ],
-  },
   { name: 'Sunday', classes: [] },
   {
     name: 'Monday',
     classes: [
-      {
-        code: 'CSE607',
-        times: ['05:38 AM', '06:38 AM'],
-        room: 'Room: 202B',
-        instructor: 'Daphne Padilla',
-      },
-      {
-        code: 'PH308',
-        times: ['06:38 AM', '07:38 AM'],
-        room: 'Room: 305A',
-        instructor: 'Zorita Rivas',
-      },
+      { code: 'MCSC', subject: 'MCSC', time: '9-10', room: 'Design Studio A', instructor: 'Prof. Smith', color: '#20B2AA' },
+      { code: 'MICRO', subject: 'Microprocessor', time: '11-12', room: 'Computer Lab 1', instructor: 'Dr. Johnson', color: '#008080' },
     ],
   },
-  { name: 'Tuesday', classes: [] },
+  {
+    name: 'Tuesday',
+    classes: [
+      { code: 'DIFF', subject: 'Differential', time: '9-10', room: 'Math Lab', instructor: 'Prof. Davis', color: '#20B2AA' },
+      { code: 'COMM', subject: 'Communication', time: '1-2', room: 'Comm Lab', instructor: 'Dr. Martinez', color: '#008080' },
+    ],
+  },
   {
     name: 'Wednesday',
     classes: [
-      {
-        code: 'EN105',
-        times: ['05:39 AM', '06:39 AM'],
-        room: 'Room: 305A',
-        instructor: 'Emmanuel Harmon',
-      },
-      {
-        code: 'MAT211',
-        times: ['06:39 AM', '07:39 AM'],
-        room: 'Room: 205B',
-        instructor: 'Daphne Padilla',
-      },
+      { code: 'COMM', subject: 'Communication', time: '9-10', room: 'Comm Lab', instructor: 'Dr. Martinez', color: '#008080' },
+      { code: 'DIFF', subject: 'Differential', time: '11-12', room: 'Math Lab', instructor: 'Prof. Davis', color: '#20B2AA' },
+      { code: 'COMLAB', subject: 'Com - Lab', time: '2-3', room: 'Computer Lab 2', instructor: 'Prof. Wilson', color: '#8FBC8F' },
     ],
   },
-  { name: 'Thursday', classes: [] },
-  { name: 'Friday', classes: [] },
-]
+  {
+    name: 'Thursday',
+    classes: [
+      { code: 'MCSC', subject: 'MCSC', time: '9-10', room: 'Design Studio A', instructor: 'Prof. Smith', color: '#20B2AA' },
+      { code: 'DB', subject: 'Database', time: '1-2', room: 'Database Lab', instructor: 'Dr. Brown', color: '#008080' },
+    ],
+  },
+  {
+    name: 'Friday',
+    classes: [
+      { code: 'DB', subject: 'Database', time: '9-10', room: 'Database Lab', instructor: 'Dr. Brown', color: '#008080' },
+      { code: 'MICRO', subject: 'Microprocessor', time: '12-1', room: 'Computer Lab 1', instructor: 'Dr. Johnson', color: '#008080' },
+      { code: 'DIFF', subject: 'Differential', time: '2-3', room: 'Math Lab', instructor: 'Prof. Davis', color: '#20B2AA' },
+    ],
+  },{
+    name: 'Friday',
+    classes: [
+      { code: 'DB', subject: 'Database', time: '9-10', room: 'Database Lab', instructor: 'Dr. Brown', color: '#008080' },
+      { code: 'MICRO', subject: 'Microprocessor', time: '12-1', room: 'Computer Lab 1', instructor: 'Dr. Johnson', color: '#008080' },
+      { code: 'DIFF', subject: 'Differential', time: '2-3', room: 'Math Lab', instructor: 'Prof. Davis', color: '#20B2AA' },
+    ],
+  },
+];
 
-const COLUMN_WIDTH = 160
-const COLORS = {
-  bg: '#e9f2ff',
-  cardBg: '#ffffff',
-  headerBlue: '#3ba0e6',
-  tileBlue: '#2d8dd8',
-  textDark: '#0f172a',
-  textLight: '#ffffff',
-  border: '#e6eef7',
-}
+const TIME_SLOTS = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3', ];
 
-function DayColumn({ day }: { day: Day }) {
+// --- Helper Function for 3D Shade ---
+function shadeColor(color: string, percent: number) {
+  const f = parseInt(color.slice(1), 16);
+  const t = percent < 0 ? 0 : 255;
+  const p = Math.abs(percent) / 100;
+  const R = f >> 16;
+  const G = (f >> 8) & 0x00ff;
+  const B = f & 0x0000ff;
   return (
-    <View style={[styles.dayColumn, { width: COLUMN_WIDTH }]}>
-      <View style={styles.dayHeader}>
-        <Text numberOfLines={1} style={styles.dayHeaderText}>
-          {day.name}
-        </Text>
-      </View>
-
-      <View style={styles.dayBody}>
-        {day.classes.length === 0 ? (
-          <View style={styles.emptySlot} />
-        ) : (
-          day.classes.map((c, idx) => (
-            <View key={c.code + idx} style={styles.classCard}>
-              <Text style={styles.classCode}>{c.code}</Text>
-              {c.times.map((t, i) => (
-                <Text key={t + i} style={styles.classLine}>
-                  {t}
-                </Text>
-              ))}
-              <Text style={styles.classLine}>{c.room}</Text>
-              <Text style={styles.classLine}>{c.instructor}</Text>
-            </View>
-          ))
-        )}
-      </View>
-    </View>
-  )
+    '#' +
+    (
+      0x1000000 +
+      (Math.round((t - R) * p) + R) * 0x10000 +
+      (Math.round((t - G) * p) + G) * 0x100 +
+      (Math.round((t - B) * p) + B)
+    )
+      .toString(16)
+      .slice(1)
+  );
 }
 
+// --- 3D Gradient Class Card ---
+const ClassCard: React.FC<{ classItem: ClassItem }> = ({ classItem }) => {
+  const darkerColor = shadeColor(classItem.color, -20);
+  return (
+    <LinearGradient
+      colors={[classItem.color, darkerColor]}
+      style={styles.classCard}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+    >
+      <Text style={styles.classSubject}>{classItem.subject}</Text>
+      <Text style={styles.classRoom}>{classItem.room}</Text>
+    </LinearGradient>
+  );
+};
+
+// --- Main Component ---
 export default function TimeTableScreen() {
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        {/* Title */}
-        <View style={styles.titleRow}>
-          <View style={styles.titleAccent} />
-          <Text style={styles.title}>Class Schedule</Text>
-        </View>
-
-        {/* Columns scroller */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.columns}
-        >
-          {/* Continuous blue header bar effect */}
-          <View style={[styles.headerRail, { width: COLUMN_WIDTH * DAYS.length }]}>
-            {DAYS.map((d) => (
-              <View
-                key={d.name}
-                style={[styles.headerRailCell, { width: COLUMN_WIDTH }]}
-              />
-            ))}
+      <ScrollView horizontal>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.universityName}>KATHMANDU UNIVERSITY</Text>
+            <View style={styles.courseInfo}>
+              <Text style={styles.courseName}>Computer Engineering</Text>
+              <Text style={styles.semesterInfo}>Year-II Semester-II</Text>
+            </View>
           </View>
 
-          {/* Actual columns */}
-          {DAYS.map((d) => (
-            <DayColumn key={d.name} day={d} />
-          ))}
-        </ScrollView>
-      </View>
+          {/* Time Table */}
+          <View style={styles.timetableContainer}>
+            {/* Time Header Row */}
+            <View style={styles.timeHeaderRow}>
+              <View style={styles.dayLabelCell}></View>
+              {TIME_SLOTS.map((time) => (
+                <View key={time} style={styles.timeHeaderCell}>
+                  <Text style={styles.timeHeaderText}>{time}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Day Rows */}
+            {DAYS.map((day) => (
+              <View key={day.name} style={styles.dayRow}>
+                <View style={styles.dayLabelCell}>
+                  <Text style={styles.dayLabelText}>{day.name}</Text>
+                </View>
+                {TIME_SLOTS.map((timeSlot) => {
+                  const classForTime = day.classes.find((cls) => cls.time === timeSlot);
+                  return (
+                    <View key={timeSlot} style={styles.timeSlotCell}>
+                      {classForTime ? <ClassCard classItem={classForTime} /> : <View style={styles.emptySlot} />}
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#ffffff', // pure white background
-    padding: 12,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff', // white background
-    borderRadius: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: '#151618ff',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        // shadowOpacity: 0.08,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 4 },
-      },
-      android: { elevation: 3 },
-    }),
-  },
-  titleRow: {
-    
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    marginBottom: 12,
-    backgroundColor: '#ffffffff', // white header
-    borderRadius: 4, color:"#000", borderColor:"#000",
-    borderBottomColor:"#000"
-  },
-  titleAccent: {
-    width: 25,
-    height: 24,
-    backgroundColor: '#0a0a0aff', // white accent
-    borderRadius: 2,
-    marginRight: 8, 
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000', borderColor:"#000", 
-  },
-  columns: {
-    paddingBottom: 30, borderRightWidth: 1,
-    
-  },
-  headerRail: {
-    position: 'absolute',
-    top: 6,
-    left: 8,
-    right: 8,
-    height: 36,
-    backgroundColor: '#f1efefff', 
-    borderRadius: 4,borderColor:"#000",  borderRightWidth: 1,
-  },
-  headerRailCell: {
-    height: '100%',
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(0,0,0,0.1)',   
-  },
-  dayColumn: {
-    marginTop: 2,
-    marginHorizontal: 8, marginLeft:20
-
-  },
-  dayHeader: {
-    backgroundColor: 'transparent',
-    height: 36,
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-  },
-  dayHeaderText: {
-    color: '#000000', // black text
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  dayBody: {
-    paddingTop: 8,
-    paddingBottom: 4,
-    minHeight: 240,
-    justifyContent: 'flex-start',
-    gap: 10 as any,
-  },
-  emptySlot: {
-    height: 120,
-    borderWidth: 1,
-    borderColor: '#000000ff',
-    borderStyle: 'dashed',
-    borderRadius: 6,
-  },
-  classCard: {
-    backgroundColor: '#ffffff', // white card
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    minWidth: COLUMN_WIDTH + 16,
-    borderWidth: 1,
-    borderColor: '#000000ff',
-  },
-  classCode: {
-    color: '#000000', // black text
-    fontWeight: '700',
-    marginBottom: 6,
-    fontSize: 15,
-  },
-  classLine: {
-    color: '#000000ff', // black text
-    marginTop: 2,
-    fontSize: 13,
-  },
+  safe: { flex: 1, backgroundColor: '#f0f0f0', padding: 20 },
+  container: { flex: 1, backgroundColor: '#ffffff', borderRadius: 12, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5 },
+  header: { alignItems: 'center', marginBottom: 30 },
+  universityName: { fontSize: 16, color: '#999999', fontWeight: '400', marginBottom: 8, textTransform: 'uppercase' },
+  courseInfo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
+  courseName: { fontSize: 20, fontWeight: 'bold', color: '#333333' },
+  semesterInfo: { fontSize: 14, color: '#999999', fontWeight: '400' },
+  timetableContainer: { backgroundColor: '#ffffff', borderRadius: 8, borderWidth: 1, borderColor: '#e0e0e0', overflow: 'hidden' },
+  timeHeaderRow: { flexDirection: 'row', backgroundColor: '#f8f9fa', borderBottomWidth: 1, borderBottomColor: '#e0e0e0' },
+  dayRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  dayLabelCell: { width: 120, height: 60, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: '#e0e0e0', backgroundColor: '#f8f9fa' },
+  dayLabelText: { fontSize: 14, color: '#222121ff', fontWeight: '600' },
+  timeHeaderCell: { width: 120, height: 50, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: '#e0e0e0' },
+  timeHeaderText: { fontSize: 14, color: '#252424ff', fontWeight: '600' },
+  timeSlotCell: { width: 120, height: 60, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: '#f0f0f0', paddingHorizontal: 4, paddingVertical: 4 },
+  emptySlot: { width: '100%', height: '100%', backgroundColor: 'transparent' },
+  classCard: { width: '100%', height: '100%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 4, height: 4 }, shadowOpacity: 0.35, shadowRadius: 6, elevation: 6, padding: 4 },
+  classSubject: { color: '#ffffff', fontSize: 14, fontWeight: 'bold', textAlign: 'center' },
+  classRoom: { color: '#ffffff', fontSize: 10, textAlign: 'center', marginTop: 2 },
 });

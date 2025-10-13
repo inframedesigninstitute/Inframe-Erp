@@ -20,7 +20,7 @@ export default function KpiCard({
   title,
   value,
   color = "blue",
-  iconName = "bar-chart", // ✅ Default icon
+  iconName = "bar-chart", 
 }: Props) {
   const bg = colorMap[color] || theme.colors.appbarFg;
 

@@ -25,7 +25,6 @@ const StudentDashboard: React.FC = () => {
         { id: 'e7', examName: 'Visual Communication Design', course: 'ART202', date: 'Nov 20, 2024', time: '2:00 PM', location: 'Design Studio B', status: 'Upcoming' },
     ];
     
-    // This array now correctly conforms to the fixed EventProps type
     const upcomingEvents: EventProps[] = [
         { id: 'v1', date: '15 Mar', title: 'Design Club Meeting', time: '4:00 PM' },
         { id: 'v2', date: '20 Mar', title: 'Guest Lecture: AI in Art', time: '11:00 AM' },

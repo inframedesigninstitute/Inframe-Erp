@@ -1,63 +1,66 @@
-import React from 'react';
+import { Feather } from '@expo/vector-icons';
+import React, { useState } from 'react';
 import {
     Dimensions,
     FlatList,
+    Modal,
+    ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
-// Note: You must install this package: npm install react-native-vector-icons
-import { Feather } from '@expo/vector-icons';
+
+// 1. **IMPORT:** DocumentPicker को यहां इंपोर्ट करें
+import * as DocumentPicker from 'expo-document-picker';
 
 const { width } = Dimensions.get('window');
-// Decide number of columns based on screen width (Mobile: 1, Tablet: 2)
-// Assignments list ke liye 1 column better hai, par image jaisa look dene ke liye 2/3 columns rakhenge.
 const NUM_COLUMNS = width > 700 ? 3 : 2; 
 
-// --- Data Structure (Updated for Assignment) ---
+// --- Data Structure (No Change) ---
 interface Assignment {
-  id: string;
-  title: string;
-  course: string;
-  session: string;
-  semester: string;
-  startDate: string;
-  endDate: string;
-  status: 'Submitted' | 'Pending';
-  initialColor: string; // Card color for UI
+    id: string;
+    title: string;
+    course: string;
+    session: string;
+    semester: string;
+    startDate: string;
+    endDate: string;
+    status: 'Submitted' | 'Pending';
+    initialColor: string; // Card color for UI
 }
+type NewAssignmentData = Omit<Assignment, 'id'>;
 
-const assignments: Assignment[] = [
-  {
-    id: '1',
-    title: 'Assignment of Arts ',
-    course: 'EN105',
-    session: 'Spring-2022',
-    semester: '1st Semester 2018',
-    startDate: '04-10-2022',
-    endDate: '13-10-2022',
-    status: 'Submitted',
-    initialColor: '#7a42f4',
-  },
-  {
-    id: '2',
-    title: 'Assignment of Design',
-    course: 'EN105',
-    session: 'Spring-2022',
-    semester: '1st Semester 2018',
-    startDate: '04-10-2022',
-    endDate: '08-10-2022',
-    status: 'Pending',
-    initialColor: '#a64dff',
-  },
+// Initial Data (No Change)
+const initialAssignments: Assignment[] = [
+    {
+        id: '1',
+        title: 'Assignment of Arts ',
+        course: 'EN105',
+        session: 'Spring-2022',
+        semester: '1st Semester 2018',
+        startDate: '04-10-2022',
+        endDate: '13-10-2022',
+        status: 'Submitted',
+        initialColor: '#7a42f4',
+    },
+    {
+        id: '2',
+        title: 'Assignment of Design',
+        course: 'EN105',
+        session: 'Spring-2022',
+        semester: '1st Semester 2018',
+        startDate: '04-10-2022',
+        endDate: '08-10-2022',
+        status: 'Pending',
+        initialColor: '#a64dff',
+    },
 ];
 
-
-
+// --- Assignment Card Component (No Change) ---
 const AssignmentCard: React.FC<{ item: Assignment }> = ({ item }) => {
     const statusBgColor = item.status === 'Submitted' ? '#00c851' : '#ff6666'; 
-    
     const initial = item.course.charAt(0);
 
     return (
@@ -84,30 +87,184 @@ const AssignmentCard: React.FC<{ item: Assignment }> = ({ item }) => {
     );
 };
 
+// --- CORRECTED Assignment Submission Modal Component with Real File Picker Logic ---
+interface SubmissionModalProps {
+    isVisible: boolean;
+    onClose: () => void;
+    onSubmit: (newAssignment: NewAssignmentData) => void;
+}
+
+const AssignmentSubmissionModal: React.FC<SubmissionModalProps> = ({ isVisible, onClose, onSubmit }) => {
+    const [title, setTitle] = useState('');
+    const [course, setCourse] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [fileName, setFileName] = useState(''); // State for File Info
+
+    // 2. **UPDATED:** Real Document Picker Logic
+    const handleFilePick = async () => {
+        try {
+            // 'type' में आप फ़ाइलों के प्रकार निर्दिष्ट कर सकते हैं। 
+            // '*/*' सभी प्रकार की फ़ाइलों की अनुमति देता है।
+            const result = await DocumentPicker.getDocumentAsync({
+                type: '*/*', 
+                copyToCacheDirectory: false, // फ़ाइल को कैश में कॉपी न करें
+            });
+
+            // जांचें कि उपयोगकर्ता ने चयन रद्द नहीं किया है और कोई एसेट (asset) चुना गया है।
+            if (result.canceled === false && result.assets && result.assets.length > 0) {
+                // फ़ाइल का नाम दिखाएँ
+                setFileName(result.assets[0].name);
+                alert(`File selected: ${result.assets[0].name}`);
+                // **NOTE:** यहां result.assets[0].uri में फ़ाइल का स्थानीय पथ (local path) है
+            } else {
+                setFileName('');
+                // alert('File selection cancelled or failed.'); // इसे हटा सकते हैं
+            }
+        } catch (err) {
+            console.error('Document Picker Error:', err);
+            alert('Error picking file. Check console.');
+        }
+    };
+
+    const handleSubmit = () => {
+        if (!title || !course || !endDate) {
+            alert('Please fill in Assignment Title, Course Code, and Due Date.');
+            return;
+        }
+
+        const newAssignment: NewAssignmentData = {
+            // Include file name in title if a file was selected
+            title: title + (fileName ? ` (Attached: ${fileName})` : ''), 
+            course: course.toUpperCase(), 
+            session: 'Current-2025', 
+            semester: 'Current Semester', 
+            startDate: new Date().toLocaleDateString('en-GB'), 
+            endDate, 
+            status: 'Submitted', 
+            initialColor: '#00c851', 
+        };
+        
+        onSubmit(newAssignment);
+
+        // Reset form and close modal
+        setTitle('');
+        setCourse('');
+        setEndDate('');
+        setFileName(''); 
+        onClose(); 
+    };
+
+    return (
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isVisible}
+            onRequestClose={onClose}
+        >
+            <View style={modalStyles.centeredView}>
+                <View style={modalStyles.modalView}>
+                    <View style={modalStyles.modalHeader}>
+                        <Text style={modalStyles.modalTitle}>Submit New Assignment</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Feather name="x" size={24} color="#333" />
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView style={modalStyles.formContainer}>
+                        <Text style={modalStyles.label}>Assignment Title</Text>
+                        <TextInput
+                            style={modalStyles.input}
+                            onChangeText={setTitle}
+                            value={title}
+                            placeholder="e.g., Final Project Report"
+                        />
+                        
+                        <Text style={modalStyles.label}>Course Code</Text>
+                        <TextInput
+                            style={modalStyles.input}
+                            onChangeText={setCourse}
+                            value={course}
+                            placeholder="e.g., CS501"
+                            autoCapitalize="characters"
+                        />
+
+                        <Text style={modalStyles.label}>Due Date (DD-MM-YYYY)</Text>
+                        <TextInput
+                            style={modalStyles.input}
+                            onChangeText={setEndDate}
+                            value={endDate}
+                            placeholder="e.g., 20-12-2025"
+                            keyboardType="numbers-and-punctuation"
+                        />
+                        
+                        {/* **FILE UPLOAD SECTION** */}
+                        <Text style={modalStyles.label}>Assignment File (PC/Mobile)</Text>
+                        <View style={modalStyles.fileInputContainer}>
+                            <TouchableOpacity 
+                                style={modalStyles.fileChooseButton} 
+                                onPress={handleFilePick} // Calls real file picker
+                            >
+                                <Feather name="upload-cloud" size={16} color="#fff" />
+                                <Text style={modalStyles.fileChooseText}>Choose File</Text>
+                            </TouchableOpacity>
+                            <Text style={modalStyles.fileNameText} numberOfLines={1}>
+                                **{fileName ? fileName : 'No file selected'}**
+                            </Text>
+                        </View>
+                        {/* **END OF FILE UPLOAD SECTION** */}
+
+                    </ScrollView>
+
+                    <TouchableOpacity
+                        style={modalStyles.submitButton}
+                        onPress={handleSubmit}
+                    >
+                        <Text style={modalStyles.submitButtonText}>Submit Assignment</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+};
+
+
+// --- AssignmentCardGridScreen Component (No Change) ---
 const AssignmentCardGridScreen: React.FC = () => {
+    const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const handleAddAssignment = (newAssignmentData: NewAssignmentData) => {
+        const newId = (assignments.length + 1).toString();
+        
+        const completeNewAssignment: Assignment = {
+            ...newAssignmentData,
+            id: newId,
+        };
+
+        setAssignments([completeNewAssignment, ...assignments]);
+    };
+
 
     const renderCard = ({ item }: { item: Assignment }) => <AssignmentCard item={item} />;
 
     return (
         <View style={styles.screenContainer}>
-         
             <View style={styles.backgroundWave} />
             
-          
             <View style={[styles.contentContainer, {marginTop: 40}]}> 
                 
-              
                 <View style={styles.contentHeader}>
                     <View>
                         <Text style={styles.mainTitle}>Assignment List</Text>
-                       
                     </View>
                     <View style={styles.actionButtons}>
-                      
-                        <TouchableOpacity style={styles.addButton}>
+                        
+                        <TouchableOpacity 
+                            style={styles.addButton}
+                            onPress={() => setIsModalVisible(true)} 
+                        >
                             <Feather name="plus" size={20} color="#fff" />
                         </TouchableOpacity>
-                   
+                    
                         <TouchableOpacity style={styles.filterButton}>
                             <Feather name="filter" size={16} color="#fff" />
                             <Text style={styles.filterButtonText}> Filters</Text>
@@ -115,7 +272,13 @@ const AssignmentCardGridScreen: React.FC = () => {
                     </View>
                 </View>
 
-             
+                {/* **Modal Component** */}
+                <AssignmentSubmissionModal
+                    isVisible={isModalVisible}
+                    onClose={() => setIsModalVisible(false)}
+                    onSubmit={handleAddAssignment}
+                />
+
                 <FlatList
                     data={assignments}
                     renderItem={renderCard}
@@ -125,7 +288,6 @@ const AssignmentCardGridScreen: React.FC = () => {
                     contentContainerStyle={styles.cardList}
                 />
 
-           
                 <View style={styles.bottomPagination}>
                     <View style={styles.paginationButtons}>
                         <Text style={styles.paginationText}>&lt; previous</Text>
@@ -142,6 +304,7 @@ const AssignmentCardGridScreen: React.FC = () => {
 };
 
 
+// --- Styles (No Change) ---
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
@@ -183,7 +346,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     addButton: {
-        backgroundColor: '#ff6666', // Red/Orange color (Add button)
+        backgroundColor: '#ff6666', 
         width: 40,
         height: 40,
         borderRadius: 20,
@@ -192,7 +355,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     filterButton: {
-        backgroundColor: '#a64dff', // Purple color (Filter button)
+        backgroundColor: '#a64dff', 
         paddingHorizontal: 15,
         paddingVertical: 10,
         borderRadius: 20,
@@ -320,5 +483,113 @@ const styles = StyleSheet.create({
         marginTop: 20,
     }
 });
+
+
+// --- Modal Specific Styles (No Change) ---
+const modalStyles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)', 
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 25,
+        alignItems: 'stretch',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: width * 0.9, 
+        maxWidth: 500, 
+        maxHeight: '80%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        paddingBottom: 10,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    formContainer: {
+        maxHeight: 300, 
+        paddingVertical: 5,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#666',
+        marginTop: 10,
+        marginBottom: 5,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 5,
+        padding: 10,
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 10,
+    },
+    // Styles for file input
+    fileInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 5,
+        padding: 5,
+    },
+    fileChooseButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#ff6666', 
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 4,
+    },
+    fileChooseText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        marginLeft: 8,
+        fontSize: 14,
+    },
+    fileNameText: {
+        flex: 1,
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#666',
+    },
+    submitButton: {
+        backgroundColor: '#a64dff', 
+        borderRadius: 25,
+        padding: 15,
+        elevation: 2,
+        marginTop: 20,
+    },
+    submitButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        fontSize: 16,
+    },
+});
+
 
 export default AssignmentCardGridScreen;

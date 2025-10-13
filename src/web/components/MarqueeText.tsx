@@ -18,8 +18,8 @@ const MarqueeText: React.FC<MarqueeTextProps> = ({
 }) => {
   const translateX = useRef(new Animated.Value(0)).current;
   const screenWidth = Dimensions.get('window').width;
-  const textWidth = text.length * 9; // Approximate character width
-  const containerWidth = screenWidth - 32; // Account for padding
+  const textWidth = text.length * 9; 
+  const containerWidth = screenWidth - 32; 
 
   useEffect(() => {
     const startAnimation = () => {

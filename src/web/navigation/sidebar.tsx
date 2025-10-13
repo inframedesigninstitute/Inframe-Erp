@@ -23,9 +23,9 @@ const menuData = [
   { label: "Notices", icon: "campaign", iconType: MaterialIcons, path: "NoticeBoardScreen" }, // 'campaign' or 'volume_up' for loudspeaker/notice icon
   { label: "Assignments", icon: "assignment", iconType: MaterialIcons, path: "AssignmentListScreen" }, // For paper with lines icon
   { label: "Download", icon: "file-download", iconType: MaterialIcons, path: "DownloadListScreen" },
+    { label: "Hostel / Transport Updates", icon: "local-taxi", path: "RequestStatusScreen" },
   { label: "Transcript", icon: "description", iconType: MaterialIcons, path: "StudentTranscript" }, // For 'Transcript' or 'paper' like icon
-  { label: "My Profile", icon: "person", iconType: MaterialIcons, path: "My Profile" },
-  { label: "Transports", icon: "local-taxi", path: "Transports" },
+  { label: "My Profile", icon: "person", iconType: MaterialIcons, path: "students/ProfileScreen" },
 
 
   // {

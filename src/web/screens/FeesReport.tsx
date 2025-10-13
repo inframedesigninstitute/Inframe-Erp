@@ -1,6 +1,7 @@
+import { AntDesign, Feather } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import {
-    Dimensions,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -25,7 +26,7 @@ interface FeeRecord {
     payDate: string | null;
 }
 
-// --- Mock Data ---
+// --- Mock Data (Kept the same for consistency) ---
 
 const mockFeesData: FeeRecord[] = [
     {
@@ -80,9 +81,34 @@ const mockFeesData: FeeRecord[] = [
         status: 'Pending',
         payDate: null,
     },
+    // Adding more mock data for better multi-select demo
+    {
+        id: 5,
+        session: 'Fall-2022',
+        semester: '2nd Semester 2018',
+        feesType: 'Exam Fees',
+        fee: 400.0,
+        discount: 0.0,
+        fine: 0.0,
+        netAmount: 400.0,
+        dueDate: '01-12-2024',
+        status: 'Pending',
+        payDate: null,
+    },
+    {
+        id: 6,
+        session: 'Spring-2023',
+        semester: '3rd Semester 2019',
+        feesType: 'Semester Fees',
+        fee: 2500.0,
+        discount: 0.0,
+        fine: 0.0,
+        netAmount: 2500.0,
+        dueDate: '01-05-2025',
+        status: 'Pending',
+        payDate: null,
+    },
 ];
-
-const screenWidth = Dimensions.get('window').width;
 
 // Define column flex widths for the table (12 columns total)
 const columnFlex = [0.5, 1.5, 2.5, 2.5, 1.5, 1.5, 1.5, 2, 2, 1.5, 2, 2.5];
@@ -102,64 +128,129 @@ const tableHeader = [
     'Action',
 ];
 
-// --- UPDATED Dropdown Component with Title ---
-interface SelectProps {
+// ===========================================
+// ✅ NEW MULTI-SELECT FILTER COMPONENT
+// ===========================================
+
+interface MultiSelectProps {
     title: string;
-    value: string;
-    // For demo purposes, we flip between 'All' and a mock session/semester/feesType
-    onSelect: (val: string) => void; 
+    options: string[];
+    selectedValues: string[];
+    onValuesChange: (vals: string[]) => void;
 }
 
-const FilterSelect: React.FC<SelectProps> = ({ title, value, onSelect }) => {
-    // Determine the next value for demonstration
-    const getNextValue = (currentTitle: string, currentValue: string) => {
-        if (currentValue !== 'All') return 'All';
-        
-        // This is simplified logic for demonstration. 
-        // In a real app, you would open a modal/picker here.
-        if (currentTitle === 'Session') return 'Spring-2022';
-        if (currentTitle === 'Semester') return '1st Semester 2018';
-        if (currentTitle === 'Fees Type') return 'Paper Fund';
-        return 'All';
+const MultiSelectFilter: React.FC<MultiSelectProps> = ({
+    title,
+    options,
+    selectedValues,
+    onValuesChange,
+}) => {
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const toggleSelect = (value: string) => {
+        if (selectedValues.includes(value)) {
+            // Remove value
+            onValuesChange(selectedValues.filter(v => v !== value));
+        } else {
+            // Add value
+            onValuesChange([...selectedValues, value]);
+        }
     };
 
+    const displayValue = useMemo(() => {
+        if (selectedValues.length === 0) return `All ${title}s`;
+        if (selectedValues.length === options.length) return `All ${title}s Selected`;
+        return selectedValues.join(', ');
+    }, [selectedValues, options, title]);
+
     return (
-        <View style={styles.formGroup}>
-            <Text style={styles.dropdownTitle}>{title}</Text>
-            <TouchableOpacity 
-                style={styles.selectContainer} 
-                onPress={() => onSelect(getNextValue(title, value))}
+        <View style={modernStyles.formGroup}>
+            <Text style={modernStyles.dropdownTitle}>{title}</Text>
+            <TouchableOpacity
+                style={modernStyles.selectContainer}
+                onPress={() => setModalVisible(true)}
             >
-                <Text style={styles.selectText}>{value}</Text>
-                <Text style={styles.selectArrow}>▼</Text>
+                <Text style={[modernStyles.selectText, { color: selectedValues.length > 0 ? '#1a202c' : '#888' }]} numberOfLines={1}>
+                    {displayValue}
+                </Text>
+                <AntDesign name="down" size={12} color="#888" />
             </TouchableOpacity>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={modernStyles.modalBackground}
+                    activeOpacity={1}
+                    onPress={() => setModalVisible(false)} // Close modal on background press
+                >
+                    <View style={modernStyles.modalContent}>
+                        <Text style={modernStyles.modalTitle}>Select {title}s</Text>
+                        
+                        <ScrollView style={{ maxHeight: 200, paddingVertical: 10 }}>
+                            {options.map((option) => (
+                                <TouchableOpacity
+                                    key={option}
+                                    style={modernStyles.checkboxItem}
+                                    onPress={() => toggleSelect(option)}
+                                >
+                                    <View style={modernStyles.checkbox}>
+                                        {selectedValues.includes(option) && (
+                                            <AntDesign name="check" size={14} color="#007bff" />
+                                        )}
+                                    </View>
+                                    <Text style={modernStyles.checkboxText}>{option}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+
+                        <TouchableOpacity 
+                            style={modernStyles.modalCloseButton} 
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Text style={modernStyles.modalCloseButtonText}>Done ({selectedValues.length})</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 };
-// --- END Dropdown Component ---
 
+// ===========================================
+// END MULTI-SELECT FILTER COMPONENT
+// ===========================================
 
 const FeesReport: React.FC = () => {
-    // 1. Filter States
+    // 1. Filter States (Now arrays for multiple selection)
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedSession, setSelectedSession] = useState('All');
-    const [selectedSemester, setSelectedSemester] = useState('All');
-    const [selectedFeesType, setSelectedFeesType] = useState('All');
+    const [selectedSession, setSelectedSession] = useState<string[]>([]);
+    const [selectedSemester, setSelectedSemester] = useState<string[]>([]);
+    const [selectedFeesType, setSelectedFeesType] = useState<string[]>([]);
 
-    // 2. Main Filtering and Searching Logic (Optimized with useMemo)
+    // 2. Extract Unique Options for the MultiSelects
+    const uniqueSessions = useMemo(() => Array.from(new Set(mockFeesData.map(d => d.session))).sort(), []);
+    const uniqueSemesters = useMemo(() => Array.from(new Set(mockFeesData.map(d => d.semester))).sort(), []);
+    const uniqueFeesTypes = useMemo(() => Array.from(new Set(mockFeesData.map(d => d.feesType))).sort(), []);
+
+
+    // 3. Main Filtering and Searching Logic (Optimized with useMemo)
     const filteredData = useMemo(() => {
         return mockFeesData.filter(record => {
             // A. Search Logic
             const searchLower = searchTerm.toLowerCase();
-            const matchesSearch = 
+            const matchesSearch =
                 record.feesType.toLowerCase().includes(searchLower) ||
                 record.session.toLowerCase().includes(searchLower) ||
                 record.semester.toLowerCase().includes(searchLower);
 
-            // B. Filter Logic
-            const matchesSession = selectedSession === 'All' || record.session === selectedSession;
-            const matchesSemester = selectedSemester === 'All' || record.semester === selectedSemester;
-            const matchesFeesType = selectedFeesType === 'All' || record.feesType === selectedFeesType;
+            // B. Filter Logic (Uses array check for multiple selection)
+            const matchesSession = selectedSession.length === 0 || selectedSession.includes(record.session);
+            const matchesSemester = selectedSemester.length === 0 || selectedSemester.includes(record.semester);
+            const matchesFeesType = selectedFeesType.length === 0 || selectedFeesType.includes(record.feesType);
 
             return matchesSearch && matchesSession && matchesSemester && matchesFeesType;
         });
@@ -167,31 +258,57 @@ const FeesReport: React.FC = () => {
     
     // Placeholder for actual filter application
     const handleFilter = () => {
-        // Since filtering is dynamic via useMemo, this button can trigger a refresh/API call
-        console.log('Filter button manually applied.');
+        console.log('Filter button applied/Search executed. Filters are automatically applied via useMemo.');
     };
+
+    const handleDownloadReceipt = (recordId: number) => {
+        console.log(`Attempting to download receipt for record ID: ${recordId}`);
+        alert(`Downloading Receipt for ID: ${recordId}`); // Mock action
+    };
+
+    const handlePayNow = (recordId: number) => {
+        console.log(`Initiating payment for record ID: ${recordId}`);
+        alert(`Redirecting to Payment for ID: ${recordId}`); // Mock action
+    };
+
 
     const renderStatusBadge = (status: 'Pending' | 'Paid') => (
         <View
             style={[
-                styles.badge,
-                status === 'Paid' ? styles.badgePaid : styles.badgePending,
+                modernStyles.badge,
+                status === 'Paid' ? modernStyles.badgePaid : modernStyles.badgePending,
             ]}>
             <Text
                 style={[
-                    styles.badgeText,
-                    status === 'Paid' ? styles.textPaid : styles.textPending,
+                    modernStyles.badgeText,
+                    status === 'Paid' ? modernStyles.textPaid : modernStyles.textPending,
                 ]}>
                 {status}
             </Text>
         </View>
     );
 
+    // --- Action Button Logic with Download ---
     const renderActionButton = (record: FeeRecord) => {
+        if (record.status === 'Paid') {
+            return (
+                <TouchableOpacity 
+                    style={modernStyles.downloadButton}
+                    onPress={() => handleDownloadReceipt(record.id)}
+                >
+                    <Feather name="download" size={14} color="#fff" />
+                    <Text style={modernStyles.downloadButtonText}> Download</Text>
+                </TouchableOpacity>
+            );
+        }
+        
         if (record.status === 'Pending') {
             return (
-                <TouchableOpacity style={styles.payButton}>
-                    <Text style={styles.payButtonText}>Pay Now</Text>
+                <TouchableOpacity 
+                    style={modernStyles.payButton}
+                    onPress={() => handlePayNow(record.id)}
+                >
+                    <Text style={modernStyles.payButtonText}>Pay Now</Text>
                 </TouchableOpacity>
             );
         }
@@ -216,16 +333,16 @@ const FeesReport: React.FC = () => {
         ];
 
         return (
-            <View key={record.id} style={styles.tableRow}>
+            <View key={record.id} style={modernStyles.tableRow}>
                 {rowData.map((cellData, cellIndex) => (
                     <View
                         key={cellIndex}
                         style={[
-                            styles.tableCell,
+                            modernStyles.tableCell,
                             { flex: columnFlex[cellIndex] },
                         ]}>
                         {typeof cellData === 'string' || typeof cellData === 'number' ? (
-                            <Text style={styles.tableCellText}>{cellData}</Text>
+                            <Text style={modernStyles.tableCellText}>{cellData}</Text>
                         ) : (
                             cellData
                         )}
@@ -236,68 +353,72 @@ const FeesReport: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Fees Report</Text>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={modernStyles.container}>
+            {/* Main Header */}
+            <View style={modernStyles.headerContainer}>
+                <Text style={modernStyles.title}>🧾 Fee Payment & Receipt</Text>
+            </View>
+            <ScrollView contentContainerStyle={modernStyles.scrollContent}>
                 
-                {/* --- Filter and Search Section --- */}
-                <View style={styles.filterCard}>
+                <View style={modernStyles.filterCard}>
                     
-                    {/* Filter Dropdowns with Titles */}
-                    <View style={styles.filterContainer}>
-                        <FilterSelect 
+                    {/* Filter Dropdowns with Titles - NOW MULTI-SELECT */}
+                    <View style={modernStyles.filterContainer}>
+                        <MultiSelectFilter 
                             title="Session" 
-                            value={selectedSession} 
-                            onSelect={setSelectedSession} 
+                            options={uniqueSessions}
+                            selectedValues={selectedSession} 
+                            onValuesChange={setSelectedSession} 
                         />
-                        <FilterSelect 
+                        <MultiSelectFilter 
                             title="Semester" 
-                            value={selectedSemester} 
-                            onSelect={setSelectedSemester} 
+                            options={uniqueSemesters}
+                            selectedValues={selectedSemester} 
+                            onValuesChange={setSelectedSemester} 
                         />
-                        <FilterSelect 
+                        <MultiSelectFilter 
                             title="Fees Type" 
-                            value={selectedFeesType} 
-                            onSelect={setSelectedFeesType} 
+                            options={uniqueFeesTypes}
+                            selectedValues={selectedFeesType} 
+                            onValuesChange={setSelectedFeesType} 
                         />
-                        <TouchableOpacity onPress={handleFilter} style={styles.filterButton}>
-                            <Text style={styles.filterButtonText}>🔎 Filter</Text>
+                        <TouchableOpacity onPress={handleFilter} style={modernStyles.filterButton}>
+                            <Feather name="filter" size={16} color="#fff" />
+                            <Text style={modernStyles.filterButtonText}>Filter</Text>
                         </TouchableOpacity>
                     </View>
 
                     {/* Show Entries and Search */}
-                    <View style={styles.showSearchContainer}>
-                        <View style={styles.showEntries}>
-                            <Text style={styles.showText}>Show </Text>
-                            <View style={styles.entriesInput}>
-                                <Text style={styles.entriesText}>10</Text>
-                            </View>
-                            <Text style={styles.showText}> entries</Text>
+                    <View style={modernStyles.showSearchContainer}>
+                        <View style={modernStyles.showEntries}>
+                            <Text style={modernStyles.showText}>Showing {filteredData.length} Records</Text>
                         </View>
-                        <View style={styles.searchBox}>
-                            <Text style={styles.showText}>Search: </Text>
+                        <View style={modernStyles.searchBox}>
+                            <Feather name="search" size={16} color="#888" style={{marginRight: 5}}/>
                             <TextInput
-                                style={styles.searchInput}
-                                placeholder="Search..."
+                                style={modernStyles.searchInput}
+                                placeholder="Search: Type, Session, or Semester"
                                 value={searchTerm}
                                 onChangeText={setSearchTerm} 
                             />
                         </View>
                     </View>
 
-                    {/* --- Data Table Section --- */}
-                    <ScrollView horizontal style={styles.tableScroll}>
-                        <View style={styles.tableWrapper}>
+                    {/* ✅ DATA TABLE SECTION TITLE */}
+                    <Text style={modernStyles.sectionTitle}>Fees Record Details</Text>
+                    
+                    <ScrollView horizontal style={modernStyles.tableScroll}>
+                        <View style={modernStyles.tableWrapper}>
                             {/* Table Header */}
-                            <View style={[styles.tableHeader, styles.tableRow]}>
+                            <View style={[modernStyles.tableHeader, modernStyles.tableRow]}>
                                 {tableHeader.map((header, index) => (
                                     <View
                                         key={index}
                                         style={[
-                                            styles.tableHeaderCell,
+                                            modernStyles.tableHeaderCell,
                                             { flex: columnFlex[index] },
                                         ]}>
-                                        <Text style={styles.tableHeaderText}>{header}</Text>
+                                        <Text style={modernStyles.tableHeaderText}>{header}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -306,27 +427,27 @@ const FeesReport: React.FC = () => {
                             {filteredData.length > 0 ? (
                                 filteredData.map(renderRow)
                             ) : (
-                                <View style={styles.noDataRow}>
-                                    <Text style={styles.noDataText}>No records found matching your criteria.</Text>
+                                <View style={modernStyles.noDataRow}>
+                                    <Text style={modernStyles.noDataText}>No records found matching your criteria.</Text>
                                 </View>
                             )}
                         </View>
                     </ScrollView>
 
                     {/* --- Pagination & Info --- */}
-                    <View style={styles.paginationContainer}>
-                        <Text style={styles.paginationText}>
-                            Showing 1 to {filteredData.length} of {filteredData.length} entries
+                    <View style={modernStyles.paginationContainer}>
+                        <Text style={modernStyles.paginationText}>
+                            Showing 1 to {filteredData.length} of {mockFeesData.length} total entries
                         </Text>
-                        <View style={styles.paginationControls}>
-                            <TouchableOpacity style={styles.paginationButtonDisabled}>
-                                <Text style={styles.paginationButtonTextDisabled}>Previous</Text>
+                        <View style={modernStyles.paginationControls}>
+                            <TouchableOpacity style={modernStyles.paginationButtonDisabled}>
+                                <Text style={modernStyles.paginationButtonTextDisabled}>Previous</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.currentPage}>
-                                <Text style={styles.currentPageText}>1</Text>
+                            <TouchableOpacity style={modernStyles.currentPage}>
+                                <Text style={modernStyles.currentPageText}>1</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.paginationButtonDisabled}>
-                                <Text style={styles.paginationButtonTextDisabled}>Next</Text>
+                            <TouchableOpacity style={modernStyles.paginationButton}>
+                                <Text style={modernStyles.paginationButtonText}>Next</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -336,30 +457,37 @@ const FeesReport: React.FC = () => {
     );
 };
 
-// --- Stylesheet ---
+// --- MODERN STYLESHEET ---
 
-const styles = StyleSheet.create({
+const modernStyles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f7fa',
+        backgroundColor: '#f8f9fa', // Lighter background
+    },
+    headerContainer: {
+        paddingHorizontal: 15,
+        paddingTop: 20,
+        paddingBottom: 10,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
     },
     scrollContent: {
-        padding: 10,
+        padding: 15,
     },
     title: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#333',
-        padding: 15,
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#1a202c', // Darker text for title
     },
     filterCard: {
         backgroundColor: '#fff',
-        borderRadius: 8,
+        borderRadius: 12,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05, // Softer shadow
+        shadowRadius: 10,
+        elevation: 5,
         marginBottom: 15,
         padding: 15,
     },
@@ -368,59 +496,55 @@ const styles = StyleSheet.create({
     filterContainer: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        marginBottom: 10,
+        marginBottom: 15,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: '#f0f0f0',
         paddingBottom: 15,
         marginHorizontal: -5,
     },
     formGroup: {
         flex: 1,
         paddingHorizontal: 5,
-        // Added space for title
     },
-    // NEW style for the dropdown title
     dropdownTitle: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#555',
+        marginBottom: 4,
     },
     selectContainer: {
-        height: 38,
-        borderColor: '#ccc',
+        height: 40,
+        borderColor: '#ddd',
         borderWidth: 1,
-        borderRadius: 4,
+        borderRadius: 8,
         justifyContent: 'space-between',
-        paddingHorizontal: 10,
+        paddingHorizontal: 12,
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#f9f9f9',
     },
     selectText: {
         fontSize: 14,
         color: '#333',
     },
-    selectArrow: {
-        color: '#888',
-        fontSize: 10,
-    },
     filterButton: {
-        height: 38,
-        backgroundColor: '#17a2b8',
-        borderRadius: 4,
-        justifyContent: 'center',
+        height: 40,
+        flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#007bff', // Primary Blue
+        borderRadius: 8,
+        justifyContent: 'center',
         paddingHorizontal: 15,
-        marginLeft: 5,
-        // Aligned with the bottom of the select containers
+        marginLeft: 10,
     },
     filterButtonText: {
         color: '#fff',
         fontWeight: '600',
         fontSize: 14,
+        marginLeft: 5,
     },
 
-    // --- Show Entries and Search ---
+    // --- Search & Info Styles ---
     showSearchContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -432,174 +556,272 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     showText: {
-        fontSize: 12,
-        color: '#555',
-    },
-    entriesInput: {
-        height: 28,
-        width: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 4,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginHorizontal: 5,
-    },
-    entriesText: {
-        fontSize: 12,
-        fontWeight: 'bold',
+        fontSize: 13,
+        color: '#666',
+        fontWeight: '500',
     },
     searchBox: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
         justifyContent: 'flex-end',
+        paddingHorizontal: 5,
+        flex: 1,
     },
     searchInput: {
-        height: 28,
-        width: 120,
-        borderColor: '#ccc',
+        height: 35,
+        flex: 1,
+        borderColor: '#ddd',
         borderWidth: 1,
-        borderRadius: 4,
-        marginLeft: 5,
-        paddingHorizontal: 8,
-        fontSize: 12,
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        fontSize: 13,
+        maxWidth: 250,
+        backgroundColor: '#f9f9f9',
+    },
+
+    // --- Section Title Style ---
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#333',
+        marginTop: 15,
+        marginBottom: 10,
+        paddingHorizontal: 5,
+        borderLeftWidth: 4,
+        borderLeftColor: '#007bff',
+        paddingLeft: 10,
     },
 
     // --- Table Styles ---
     tableScroll: {
         width: '100%',
+        marginTop: 5,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#eee',
+        overflow: 'hidden',
     },
     tableWrapper: {
         minWidth: 950,
     },
     tableHeader: {
-        backgroundColor: '#343a40',
+        backgroundColor: '#2c3e50', // Darker Header
     },
     tableRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-        minHeight: 40,
+        borderBottomColor: '#f7f7f7',
+        minHeight: 45,
         alignItems: 'center',
+        backgroundColor: '#fff',
     },
     tableHeaderCell: {
-        padding: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 8,
         justifyContent: 'center',
     },
     tableHeaderText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 10,
+        color: '#fff', // Changed text color to white for dark header
+        fontWeight: '700',
+        fontSize: 11,
         textAlign: 'center',
     },
     tableCell: {
         padding: 8,
         justifyContent: 'center',
-        minHeight: 40,
+        minHeight: 45,
     },
     tableCellText: {
-        fontSize: 12,
+        fontSize: 13,
         color: '#333',
         textAlign: 'center',
     },
     noDataRow: {
-        padding: 15,
+        padding: 20,
         alignItems: 'center',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#fdfdfd',
         minWidth: 750,
     },
     noDataText: {
-        color: '#6c757d',
+        color: '#999',
         fontSize: 14,
         fontWeight: '500',
     },
 
     // --- Status Badge ---
     badge: {
-        borderRadius: 4,
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-        alignSelf: 'center',
-        width: 65,
-    },
-    badgePending: {
-        backgroundColor: '#e6f7ff',
-    },
-    badgePaid: {
-        backgroundColor: '#ebfdf3',
-    },
-    badgeText: {
-        fontSize: 10,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    textPending: {
-        color: '#1890ff',
-    },
-    textPaid: {
-        color: '#52c41a',
-    },
-
-    // --- Action Button (Pay Now) ---
-    payButton: {
-        backgroundColor: '#007bff',
-        borderRadius: 4,
+        borderRadius: 15, // Pill shape
         paddingVertical: 5,
         paddingHorizontal: 10,
         alignSelf: 'center',
+        minWidth: 70,
+    },
+    badgePending: {
+        backgroundColor: '#f0f8ff',
+    },
+    badgePaid: {
+        backgroundColor: '#f2fff0',
+    },
+    badgeText: {
+        fontSize: 11,
+        fontWeight: '700',
+        textAlign: 'center',
+    },
+    textPending: {
+        color: '#007bff', // Blue
+    },
+    textPaid: {
+        color: '#28a745', // Green
+    },
+
+    // --- Action Buttons ---
+    payButton: {
+        backgroundColor: '#ffc107', // Warning/Yellow
+        borderRadius: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        alignSelf: 'center',
     },
     payButtonText: {
+        color: '#333',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    downloadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#28a745', // Success/Green
+        borderRadius: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        alignSelf: 'center',
+    },
+    downloadButtonText: {
         color: '#fff',
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '600',
     },
+
 
     // --- Pagination Styles ---
     paginationContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 10,
-        paddingTop: 10,
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
+        marginTop: 20,
+        paddingHorizontal: 5,
     },
     paginationText: {
-        fontSize: 12,
-        color: '#666',
+        fontSize: 13,
+        color: '#6c757d',
     },
     paginationControls: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    paginationButtonDisabled: {
+    paginationButton: {
         backgroundColor: '#fff',
         paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 4,
+        paddingVertical: 7,
+        borderRadius: 6,
         marginLeft: 5,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#007bff',
+    },
+    paginationButtonText: {
+        color: '#007bff',
+        fontSize: 13,
+        fontWeight: '500',
+    },
+    paginationButtonDisabled: {
+        backgroundColor: '#f8f9fa',
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: 6,
+        marginLeft: 5,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
     },
     paginationButtonTextDisabled: {
         color: '#6c757d',
-        fontSize: 14,
+        fontSize: 13,
     },
     currentPage: {
         backgroundColor: '#007bff',
-        width: 30,
-        height: 30,
-        borderRadius: 4,
+        width: 32,
+        height: 32,
+        borderRadius: 6,
         justifyContent: 'center',
         alignItems: 'center',
         marginLeft: 5,
     },
     currentPageText: {
-        color: '#fff',
+        color: '#fff', // Changed to white for better contrast
         fontWeight: 'bold',
         fontSize: 14,
     },
+
+    // --- Modal Styles for MultiSelect ---
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dim background
+    },
+    modalContent: {
+        width: '80%',
+        maxWidth: 300,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        paddingBottom: 10,
+    },
+    checkboxItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 5,
+    },
+    checkbox: {
+        width: 18,
+        height: 18,
+        borderWidth: 1.5,
+        borderColor: '#007bff',
+        borderRadius: 4,
+        marginRight: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f8faff',
+    },
+    checkboxText: {
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '500',
+    },
+    modalCloseButton: {
+        marginTop: 15,
+        backgroundColor: '#007bff',
+        padding: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    modalCloseButtonText: {
+        color: '#fff',
+        fontWeight: '700',
+    }
 });
 
 export default FeesReport;

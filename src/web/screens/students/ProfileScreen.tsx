@@ -1,178 +1,262 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import React from 'react';
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-const ProfileScreen = () => {
+// Using Feather Icons for a clean, modern look (Requires installing @expo/vector-icons or similar)
+import Icon from 'react-native-vector-icons/Feather';
+
+const { width } = Dimensions.get('window');
+
+// --- COLORS ---
+const PRIMARY_COLOR = '#4a90e2'; // Blue accent
+const SECONDARY_COLOR = '#50e3c2'; // Teal accent
+const TEXT_COLOR = '#333333';
+const LIGHT_GREY = '#f7f7f7';
+const BORDER_COLOR = '#e0eeef';
+
+// --- DATA STRUCTURE ---
+const profileData = {
+  name: 'Alex Johnson',
+  role: 'Senior UI/UX Designer',
+  profileImage: 'https://i.pravatar.cc/150?img=3',
+  stats: [
+    { label: 'Followers', value: '1.2K' },
+    { label: 'Projects', value: '78' },
+    { label: 'Points', value: '950' },
+  ],
+};
+
+const menuItems = [
+  { icon: 'edit', label: 'Edit Profile', screen: 'EditProfile' },
+  { icon: 'settings', label: 'App Settings', screen: 'Settings' },
+  { icon: 'credit-card', label: 'Payment & Billing', screen: 'Billing' },
+  { icon: 'help-circle', label: 'Support & Help', screen: 'Help' },
+  { icon: 'log-out', label: 'Logout', screen: 'Logout', isDanger: true },
+];
+
+// --- Helper Component: Stats Chip ---
+interface StatChipProps {
+  label: string;
+  value: string;
+}
+const StatChip: React.FC<StatChipProps> = ({ label, value }) => (
+  <View style={styles.statChip}>
+    <Text style={styles.statValue}>{value}</Text>
+    <Text style={styles.statLabel}>{label}</Text>
+  </View>
+);
+
+// --- Helper Component: Menu Item Row ---
+interface MenuItemProps {
+  item: typeof menuItems[0];
+  onPress: () => void;
+}
+const MenuItem: React.FC<MenuItemProps> = ({ item, onPress }) => {
+  const textColor = item.isDanger ? 'red' : TEXT_COLOR;
+  
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>My Profile</Text>
-
-      <View style={styles.card}>
-        {/* Left Section */}
-        <View style={styles.leftSection}>
-          <Image
-            source={{ uri: "https://images.ctfassets.net/4cd45et68cgf/564owNzMKj6UGjvTEZkKSJ/c853cf640796fcd532d60c23fc57f6b6/Rowan_Atkinson_credit__Alastair_Muir.jpg?w=2000" }}
-            style={styles.profileImage}
-          />
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>ACADEMIC INFORMATION</Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Batch:</Text> 5th Batch
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Program:</Text> Computer Engineering
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Session:</Text> Spring-2022
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Semester:</Text> 1st Semester 2018
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Section:</Text> Section A
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Status:</Text>{" "}
-              <Text style={styles.status}>New Admission</Text>
-            </Text>
-          </View>
+    <TouchableOpacity style={styles.menuItemContainer} onPress={onPress}>
+      <View style={styles.menuItemLeft}>
+        <View style={[styles.menuIconCircle, { backgroundColor: item.isDanger ? '#ffdddd' : LIGHT_GREY }]}>
+          <Icon name={item.icon} size={20} color={item.isDanger ? 'red' : PRIMARY_COLOR} />
         </View>
-
-        {/* Middle Section */}
-        <View style={styles.middleSection}>
-          <Text style={styles.infoTitle}>PROFILE INFO</Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Student ID:</Text> #1014
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Name:</Text> Rylee Pratt
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Father Name:</Text> Henry Pollard
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Mother Name:</Text> Russell Rosa
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Email:</Text> student@mail.com
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Phone:</Text> +1 (611) 728-8917
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Gender:</Text> Other
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Date Of Birth:</Text> 25-03-1972
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Marital Status:</Text> Widowed
-          </Text>
-          <Text style={styles.infoItem}>
-            <Text style={styles.label}>Blood Group:</Text> A+
-          </Text>
-        </View>
-
-        {/* Right Section */}
-        <View style={styles.rightSection}>
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>PRESENT ADDRESS</Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>State/Province:</Text> Khulna
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>District/City:</Text> Norail
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Address:</Text> Nihil fuga Tempore
-            </Text>
-          </View>
-
-          <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>PERMANENT ADDRESS</Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>State/Province:</Text> Rangpur
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>District/City:</Text> Dinajpur
-            </Text>
-            <Text style={styles.infoItem}>
-              <Text style={styles.label}>Address:</Text> Est illo officia do
-            </Text>
-          </View>
-        </View>
+        <Text style={[styles.menuItemLabel, { color: textColor }]}>{item.label}</Text>
       </View>
-    </ScrollView>
+      <Icon name="chevron-right" size={20} color="#cccccc" />
+    </TouchableOpacity>
   );
 };
 
-export default ProfileScreen;
 
+// --- Main Profile Screen Component ---
+export default function ProfessionalProfileScreen() {
+  // Mock function for navigation
+  const handleMenuItemPress = (screen: string) => {
+    console.log(`Navigating to ${screen}`);
+    // In a real app, you would use navigation.navigate(screen)
+  };
+  
+  return (
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        
+        {/* --- 1. Header Section --- */}
+        <View style={styles.header}>
+            {/* Background for a modern elevated feel */}
+            <View style={styles.headerBg} /> 
+            
+            <Image
+                source={{ uri: profileData.profileImage }}
+                style={styles.profileImage}
+            />
+            <Text style={styles.name}>{profileData.name}</Text>
+            <Text style={styles.role}>{profileData.role}</Text>
+            
+            <TouchableOpacity style={styles.editButton}>
+                <Text style={styles.editButtonText}>Edit Profile</Text>
+            </TouchableOpacity>
+        </View>
+
+        {/* --- 2. Stats Bar --- */}
+        <View style={styles.statsBar}>
+          {profileData.stats.map((stat, index) => (
+            <StatChip key={index} label={stat.label} value={stat.value} />
+          ))}
+        </View>
+
+        {/* --- 3. Menu List --- */}
+        <View style={styles.menuList}>
+          {menuItems.map((item) => (
+            <MenuItem 
+              key={item.screen} 
+              item={item} 
+              onPress={() => handleMenuItemPress(item.screen)}
+            />
+          ))}
+        </View>
+
+      </ScrollView>
+    </View>
+  );
+}
+
+// --- Stylesheet ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#e6f2ff",
-    padding: 10,
+    backgroundColor: LIGHT_GREY, // Light grey background for entire screen
   },
+  
+  // --- Header Styles ---
   header: {
-    fontSize: 20,
-    fontWeight: "bold",
+    alignItems: 'center',
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: 'white', // White base for the header content
     marginBottom: 10,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: 'hidden',
   },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    flexDirection: "row",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  leftSection: {
-    flex: 1,
-    alignItems: "center",
+  headerBg: {
+    // This creates a subtle rounded rectangle behind the image/text for visual depth
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 150, 
+    backgroundColor: PRIMARY_COLOR, // Can be a light version of the primary color
+    opacity: 0.1,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    borderWidth: 4,
+    borderColor: '#ffffff',
     marginBottom: 10,
+    // Simple shadow for elevation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 5,
   },
-  infoBox: {
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: TEXT_COLOR,
+  },
+  role: {
+    fontSize: 16,
+    color: '#999999',
+    marginBottom: 15,
+  },
+  editButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingVertical: 8,
+    paddingHorizontal: 30,
+    borderRadius: 20,
     marginTop: 10,
-    padding: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    width: "90%",
   },
-  infoTitle: {
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
+  editButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
     fontSize: 14,
   },
-  infoItem: {
-    fontSize: 15,
-    marginVertical: 2,
+
+  // --- Stats Bar Styles ---
+  statsBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    borderRadius: 15,
+    paddingVertical: 15,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: BORDER_COLOR,
+    // Add shadow similar to the previous style for continuity
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  label: {
-    fontWeight: "bold",
-    color: "#000000ff",
+  statChip: {
+    alignItems: 'center',
   },
-  status: {
-    backgroundColor: "#007bff",
-    color: "#fff",
-    paddingHorizontal: 4,
-    borderRadius: 3,
-    fontSize: 10,
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: PRIMARY_COLOR,
   },
-  middleSection: {
-    flex: 2,
-    paddingHorizontal: 10,
+  statLabel: {
+    fontSize: 12,
+    color: '#999999',
+    marginTop: 2,
   },
-  rightSection: {
-    flex: 1.5,
-    paddingLeft: 10,
+
+  // --- Menu List Styles ---
+  menuList: {
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    borderRadius: 15,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: BORDER_COLOR,
+    marginBottom: 20,
+  },
+  menuItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER_COLOR,
+  },
+  menuItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIconCircle: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  menuItemLabel: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

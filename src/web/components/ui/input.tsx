@@ -25,7 +25,7 @@ export const Input: React.FC<InputProps> = ({
         keyboardType={keyboardType}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
-        placeholderTextColor="#999"
+        placeholderTextColor="#000000ff"
       />
     </View>
   );

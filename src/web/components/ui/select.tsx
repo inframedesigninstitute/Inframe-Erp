@@ -7,7 +7,7 @@ type SelectProps = {
 }
 
 export const Select: FC<SelectProps> = ({ value, onValueChange, children }) => (
-  <select value={value} onChange={(e) => onValueChange(e.target.value)} style={{ padding: 48, borderRadius: 4 }}>
+  <select value={value} onChange={(e) => onValueChange(e.target.value)} style={{ padding: 4, borderRadius: 4 }}>
     {children}
   </select>
 )
