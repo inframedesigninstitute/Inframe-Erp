@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/MaterialIcons";
-
 import { useNav } from "../contexts/nav-context";
 
 const menuData = [
@@ -26,9 +26,21 @@ const menuData = [
     { label: "Hostel / Transport Updates", icon: "local-taxi", path: "RequestStatusScreen" },
   { label: "Transcript", icon: "description", iconType: MaterialIcons, path: "StudentTranscript" }, // For 'Transcript' or 'paper' like icon
   { label: "My Profile", icon: "person", iconType: MaterialIcons, path: "students/ProfileScreen" },
+       { 
+        label: "FeedbackScreen", 
+        path: "FeedbackScreen",
+        icon: "feedback",      // MaterialCommunityIcons
+        iconType: MaterialCommunityIcons
+    },
+   { 
+        label: "Canteen", 
+        path: "CanteenScreen",
+        icon: "add-shopping-cart", 
+        iconType: MaterialCommunityIcons
+    },
 
 
-  // {
+  // {FeedbackScreen
   //   label: "Students",
   //   icon: "group",
   //   children: [

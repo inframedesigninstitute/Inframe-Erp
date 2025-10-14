@@ -1,8 +1,10 @@
 import React from "react"
 import AssignmentListScreen from "../screens/AssignmentList"
+import CanteenScreen from "../screens/CanteenScreen"
 import Dashboard from "../screens/dashboard"
 import DownloadListScreen from "../screens/DownloadListScreen"
 import ExamScheduleScreen from "../screens/ExamScheduleScreen"
+import FeedbackScreen from "../screens/FeedbackScreen"
 import FeesReport from "../screens/FeesReport"
 import GenericScreen from "../screens/generic-screen"
 import LeaveApplication from "../screens/LeaveApplication"
@@ -64,6 +66,8 @@ export const ROUTES: string[] = [
   "AssignmentListScreen",
   "DownloadListScreen",
   "StudentTranscript","RequestStatusScreen",
+  "FeedbackScreen",
+  "CanteenScreen"
 ]
 
 export function getScreenForRoute(key: string): React.ReactElement {
@@ -86,6 +90,8 @@ export function getScreenForRoute(key: string): React.ReactElement {
   if (key === "DownloadListScreen") return <DownloadListScreen />
   if (key === "StudentTranscript") return <StudentTranscript />
   if (key === "RequestStatusScreen") return <RequestStatusScreen />
+  if (key === "FeedbackScreen") return <FeedbackScreen />
+  if (key === "CanteenScreen") return <CanteenScreen />
 
 
   return <GenericScreen title={key} />
