@@ -40,17 +40,15 @@ const MyTasksSection: React.FC = () => {
 
   const getStatusTextStyle = (status: Task['status']) => {
     switch (status) {
-      case 'In progress': return { color: '#ffb300' }; // Amber
-      case 'To do': return { color: '#7a70fa' }; // Purple
-      case 'Done': return { color: '#4CAF50' }; // Green
+      case 'In progress': return { color: '#ffb300' };
+      case 'To do': return { color: '#7a70fa' };
+      case 'Done': return { color: '#4CAF50' };
       default: return { color: '#333' };
     }
   };
 
-
   return (
     <View style={styles.sectionContainer}>
-      {/* Header */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>My tasks</Text>
         <TouchableOpacity style={styles.addButton}>
@@ -58,7 +56,6 @@ const MyTasksSection: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Category Tabs */}
       <View style={styles.categoryTabs}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {['All task', 'To do', 'In progress', 'Done'].map(category => (
@@ -83,7 +80,6 @@ const MyTasksSection: React.FC = () => {
         </ScrollView>
       </View>
 
-      {/* Task List */}
       <View style={styles.taskList}>
         {filteredTasks.map(task => (
           <View key={task.id} style={styles.taskItem}>
@@ -114,7 +110,6 @@ const MyTasksSection: React.FC = () => {
         ))}
       </View>
 
-      {/* View All Tasks Button */}
       <TouchableOpacity style={styles.viewAllButton}>
         <Text style={styles.viewAllButtonText}>View all tasks</Text>
       </TouchableOpacity>
@@ -124,31 +119,42 @@ const MyTasksSection: React.FC = () => {
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: '#f3f6fb',
+    borderRadius: 18,
+    padding: 18,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowColor: '#b0bec5',
+    shadowOffset: { width: -4, height: -4 },
+    shadowOpacity: 1,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 6,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 15,
-  },
+  },taskList: {
+  // optional: you can add spacing if needed
+  marginBottom: 10,
+},
+
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#0d1b2a',
+    textShadowColor: '#e0e0e0',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   addButton: {
     backgroundColor: '#7a70fa',
     borderRadius: 10,
     padding: 8,
+    shadowColor: '#4a40d1',
+    shadowOffset: { width: 2, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   categoryTabs: {
     marginBottom: 15,
@@ -156,14 +162,23 @@ const styles = StyleSheet.create({
   categoryButton: {
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginRight: 10,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: '#e8ecf3',
+    shadowColor: '#ffffff',
+    shadowOffset: { width: -2, height: -2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   categoryButtonActive: {
-    backgroundColor: '#f5f7fa', // A slightly different background for active, or border
+    backgroundColor: '#dfe6fd',
     borderWidth: 1,
-    borderColor: '#ccc', // A border to show active
+    borderColor: '#b6c3ff',
+    shadowColor: '#cfd8dc',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.9,
+    shadowRadius: 4,
   },
   categoryButtonText: {
     fontSize: 13,
@@ -171,17 +186,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   categoryButtonTextActive: {
-    color: '#333',
-    fontWeight: '600',
-  },
-  taskList: {
-    //
+    color: '#2a2a72',
+    fontWeight: '700',
   },
   taskItem: {
-    backgroundColor: '#f5f7fa',
-    borderRadius: 10,
+    backgroundColor: '#f4f7fc',
+    borderRadius: 14,
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 12,
+    shadowColor: '#cfd8dc',
+    shadowOffset: { width: -3, height: -3 },
+    shadowOpacity: 1,
+    shadowRadius: 5,
+    elevation: 5,
   },
   taskHeader: {
     flexDirection: 'row',
@@ -192,8 +209,11 @@ const styles = StyleSheet.create({
   taskTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-    flex: 1, // Allow title to take available space
+    color: '#1b263b',
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    flex: 1,
     marginRight: 10,
   },
   taskStatus: {
@@ -202,13 +222,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   statusInProgress: {
-    backgroundColor: '#fffbe6', // Light yellow background
+    backgroundColor: '#fff8e1',
+    shadowColor: '#ffecb3',
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.7,
+    shadowRadius: 2,
   },
   statusTodo: {
-    backgroundColor: '#ede9fe', // Light purple background
+    backgroundColor: '#ede9fe',
   },
   statusDone: {
-    backgroundColor: '#e8f5e9', // Light green background
+    backgroundColor: '#e8f5e9',
   },
   taskStatusText: {
     fontSize: 12,
@@ -216,7 +240,7 @@ const styles = StyleSheet.create({
   },
   taskSubject: {
     fontSize: 13,
-    color: '#888',
+    color: '#607d8b',
     marginBottom: 10,
   },
   taskFooter: {
@@ -226,11 +250,11 @@ const styles = StyleSheet.create({
   },
   taskDate: {
     fontSize: 12,
-    color: '#666',
+    color: '#555',
   },
   taskComments: {
     fontSize: 12,
-    color: '#666',
+    color: '#333',
   },
   taskNoComments: {
     fontSize: 12,
@@ -242,37 +266,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     borderRadius: 3,
     overflow: 'hidden',
-    position: 'relative',
   },
-  progressBar: { // This is the base grey bar
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    right: 0, // Fill the whole container
-    backgroundColor: '#e0e0e0', // Base grey
+  progressBar: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#e0e0e0',
   },
   progressBarFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: '60%', // Example: 60% progress
-    backgroundColor: '#FFD700', // Gold color for progress
+    width: '60%',
+    height: '100%',
+    backgroundColor: '#ffb300',
     borderRadius: 3,
+    shadowColor: '#ffc107',
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
   },
   viewAllButton: {
     marginTop: 15,
     alignSelf: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 10,
-    backgroundColor: '#f0f2f5',
+    borderRadius: 12,
+    backgroundColor: '#e9edf7',
+    shadowColor: '#fff',
+    shadowOffset: { width: -2, height: -2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 4,
   },
   viewAllButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#1a237e',
   },
 });
 

@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Dummy data for the schedule
 const dummySchedule = [
   { time: '09:00 - 10:00', subject: 'Math: Algebra', teacher: 'Mr. John Smith', location: 'Class C, Block B', color: '#7a70fa' },
   { time: '10:00 - 11:00', subject: 'English Literature', teacher: 'Ms. Clara Jones', location: 'Class A, Block D', color: '#FFC107' },
@@ -58,14 +57,14 @@ const MyScheduleSection: React.FC = () => {
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: '#f1f5fb',
+    borderRadius: 20,
+    padding: 18,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -87,17 +86,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   scheduleList: {
-    // You might want to limit the height if this component is placed alone
-    maxHeight: 400, // Example limit
+    maxHeight: 400,
   },
   lessonItem: {
     flexDirection: 'row',
-    backgroundColor: '#f5f7fa',
-    borderRadius: 10,
+    backgroundColor: '#f9fafc',
+    borderRadius: 15,
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 12,
     alignItems: 'center',
     overflow: 'hidden',
+    // 3D / neumorphic shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
   },
   colorBar: {
     width: 6,
@@ -112,7 +116,7 @@ const styles = StyleSheet.create({
   },
   lessonTime: {
     fontSize: 12,
-    color: '#7a70fa', // The primary color for time
+    color: '#7a70fa',
     fontWeight: '600',
   },
   lessonSubject: {

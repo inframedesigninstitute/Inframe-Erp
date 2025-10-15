@@ -3,12 +3,8 @@ import { Dimensions, Image, ImageBackground, StyleSheet, Text, TouchableOpacity,
 
 const { width } = Dimensions.get('window');
 
-// Local image paths (UPDATE THESE PATHS TO YOUR ACTUAL IMAGE LOCATIONS)
 const LOCAL_ILLUSTRATION = require('../assets/readdatop.jpg'); 
-// 1. ADD THIS NEW CONSTANT FOR THE SIDE PANEL BACKGROUND IMAGE
-//    NOTE: You MUST ensure 'your_background_image.jpg' actually exists at this path.
 const SIDE_PANEL_BACKGROUND = require('../assets/sidepanel_bg.jpg'); 
-
 
 interface PromotionBannerProps {
   userName: string;
@@ -19,7 +15,7 @@ interface PromotionBannerProps {
 const PromotionBanner: React.FC<PromotionBannerProps> = ({ userName, courseName, completedUsers }) => {
   return (
     <View style={styles.container}>
-      {/* Main Banner Box with 3D-like effect */}
+      {/* Main Banner Box with 3D effect */}
       <View style={styles.bannerBox}>
         {/* Left Side Illustration */}
         <View style={styles.illustrationContainer}>
@@ -43,7 +39,6 @@ const PromotionBanner: React.FC<PromotionBannerProps> = ({ userName, courseName,
 
       {/* Right Side 'Create New Course' Section */}
       <ImageBackground
-        // 2. USE THE NEW CONSTANT HERE
         source={SIDE_PANEL_BACKGROUND} 
         style={styles.sidePanel} 
         imageStyle={styles.backgroundImage} 
@@ -63,20 +58,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f0f3f7',
   },
   bannerBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E6F0FF',
-    borderRadius: 12,
-    shadowColor: '#1A73E8',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
+    borderRadius: 16,
     width: width * 0.45,
     padding: 15,
+    // 3D / Neumorphic effect
+    shadowColor: '#000',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
   },
   illustrationContainer: {
     width: 100,
@@ -105,16 +101,22 @@ const styles = StyleSheet.create({
   backgroundImage: {
     resizeMode: 'cover', 
     opacity: 0.7,
-    borderRadius: 12, 
+    borderRadius: 16, 
   },
   sidePanel: {
-    width:300,
+    width: 300,
     height: 150,
     paddingHorizontal: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 12, 
-    overflow: 'hidden', 
+    borderRadius: 16,
+    overflow: 'hidden',
+    // 3D / Neumorphic effect
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
   },
   sidePanelText: {
     fontSize: 16,
@@ -122,18 +124,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', 
     textAlign: 'center',
     marginBottom: 8, 
-    // width: width * 0.2, // This width was too small; removed or adjusted it.
   },
   button: {
     backgroundColor: '#1A73E8',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderRadius: 8,
-    shadowColor: '#1A73E8',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5, top:39
+    borderRadius: 10,
+    // 3D / Neumorphic shadow
+    shadowColor: '#1565C0',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 6,
+    top: 39,
   },
   buttonText: {
     color: '#FFFFFF',
