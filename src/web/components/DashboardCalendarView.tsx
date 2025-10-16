@@ -172,9 +172,9 @@ const DashboardCalendarView: React.FC = () => {
         <div
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
+            top: -50,
+            left: -50,
+            width: '80vw',
             height: '100vh',
             backgroundColor: 'rgba(0,0,0,0.7)',
             display: 'flex',

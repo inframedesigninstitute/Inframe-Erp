@@ -140,11 +140,9 @@ const ExamScheduleScreen = () => {
     // --- Main Component Render ---
     return (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.container}> 
-            <Text style={styles.title}>Exam Schedule</Text>
+            <Text style={styles.title}>Exam and Result Sammary</Text>
 
-            {/* Exam Type Dropdown and Search Button (Main Card) */}
             <View style={styles.mainCard}>
-                {/* Professional Label */}
                 <Text style={styles.label}>Exam Type <Text style={{ color: 'red' }}>*</Text></Text>
                 <View style={styles.filterContainer}>
                     

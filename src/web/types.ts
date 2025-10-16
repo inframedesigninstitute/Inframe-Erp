@@ -46,3 +46,10 @@ export interface ExamBoardProps {
 export interface UpcomingEventsProps {
     upcomingEvents: EventProps[];
 }
+
+export interface SubjectAttendance {
+  subject: string;
+  attended: number;
+  total: number;
+  percentage: number;
+}

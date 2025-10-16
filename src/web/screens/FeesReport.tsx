@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-
+import FeeStatusCard, { FeeStatusProps } from '../components/FeeStatusCard'; // **पाथ को अपने कंपोनेंट्स फ़ोल्डर के अनुसार बदलें**
 // --- Interfaces for Type Safety ---
 
 interface FeeRecord {
@@ -236,7 +236,12 @@ const FeesReport: React.FC = () => {
     const uniqueSemesters = useMemo(() => Array.from(new Set(mockFeesData.map(d => d.semester))).sort(), []);
     const uniqueFeesTypes = useMemo(() => Array.from(new Set(mockFeesData.map(d => d.feesType))).sort(), []);
 
-
+const overallFeeData: FeeStatusProps = {
+        totalFee: 75000,
+        paidAmount: 45000,
+        dueDate: '2025-08-30',
+        currencySymbol: '₹', // या आपकी जरूरत के अनुसार
+    };
     // 3. Main Filtering and Searching Logic (Optimized with useMemo)
     const filteredData = useMemo(() => {
         return mockFeesData.filter(record => {
@@ -359,7 +364,12 @@ const FeesReport: React.FC = () => {
                 <Text style={modernStyles.title}>🧾 Fee Payment & Receipt</Text>
             </View>
             <ScrollView contentContainerStyle={modernStyles.scrollContent}>
-                
+               <FeeStatusCard 
+                    totalFee={overallFeeData.totalFee}
+                    paidAmount={overallFeeData.paidAmount}
+                    dueDate={overallFeeData.dueDate}
+                    currencySymbol={overallFeeData.currencySymbol}
+                /> 
                 <View style={modernStyles.filterCard}>
                     
                     {/* Filter Dropdowns with Titles - NOW MULTI-SELECT */}

@@ -3,6 +3,7 @@ import { Dimensions, SafeAreaView, ScrollView, StyleSheet, View } from 'react-na
 
 import AcademicDashboard from '../components/AcademicDashboard';
 import DashboardCourseCard from '../components/DashboardCourseCard';
+import DashboardQuickActions from '../components/DashboardQuickActions';
 import MyNotesSection from '../components/MyNotesSection';
 import MyScheduleSection from '../components/MyScheduleSection';
 import MyTasksSection from '../components/MyTasksSection';
@@ -40,6 +41,7 @@ const StudentDashboardScreen: React.FC = () => {
               </View>
               <View style={styles.section3D}>
                 <MyScheduleSection />
+                <DashboardQuickActions />
               </View>
             </View>
           </View>

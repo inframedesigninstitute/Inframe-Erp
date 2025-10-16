@@ -1,6 +1,8 @@
 import { Picker } from "@react-native-picker/picker";
 import { useMemo, useState } from "react";
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import AttendanceOverview from '../../components/AttendanceOverview'; // Adjust path
+
 
 type AttendanceStatus = "P" | "A" | "L" | "H" | "";
 
@@ -395,7 +397,14 @@ export default function Lecture_wise_AttendanceScreen() {
                 course={selectedCourse}
             />
 
+<SafeAreaView style={{ flex: 1 }}>
+      <AttendanceOverview />
+    </SafeAreaView>
+
+
         </ScrollView>
+
+
     );
 }
 
@@ -418,7 +427,10 @@ const styles = StyleSheet.create({
     scrollContent: {
         padding: 20, 
         flexGrow: 1,
-    },
+    },container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa', // Matches the component's outer background
+  },
     card: { 
         padding: 16, 
         backgroundColor: BASE_COLOR,

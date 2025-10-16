@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: borderGray,
-    backgroundColor: '#f1f1f1', // Lighter background for the semester heading
+    backgroundColor: '#f1f1f1', 
   },
   
   // Course Table

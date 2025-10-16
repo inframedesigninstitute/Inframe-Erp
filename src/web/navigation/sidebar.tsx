@@ -15,7 +15,7 @@ import { useNav } from "../contexts/nav-context";
 const menuData = [
    { label: "Dashboard", icon: "dashboard", iconType: MaterialIcons, path: "Dashboard" },
   { label: "Class Schedule", icon: "event", iconType: MaterialIcons, path: "students/TimeTableScreen" },
-  { label: "Exam Schedule", icon: "assignment", iconType: MaterialIcons, path: "ExamScheduleScreen" },
+  { label: "Exam and Result Sammary", icon: "assignment", iconType: MaterialIcons, path: "ExamScheduleScreen" },
   { label: "Attendances", icon: "check-circle", iconType: MaterialIcons, path: "students/Lecture_wise_AttendanceScreen" },
   { label: "Apply Leaves", icon: "edit", iconType: MaterialIcons, path: "LeaveApplication" }, // 'edit' or 'create' for pencil icon
   { label: "Fees Report", icon: "receipt", iconType: MaterialIcons, path: "FeesReport" },
