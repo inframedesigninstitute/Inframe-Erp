@@ -25,7 +25,9 @@ const StudentDashboardScreen: React.FC = () => {
           {/* Wrap DashboardCourseCard & AcademicDashboard in 3D container */}
           <View style={styles.cardContainer3D}>
             <DashboardCourseCard/>
-            <AcademicDashboard/>
+          </View>
+          <View>
+             <AcademicDashboard/>
           </View>
 
           <View style={styles.mainContentLayout}>

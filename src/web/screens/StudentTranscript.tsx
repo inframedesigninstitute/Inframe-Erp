@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import AcademicServiceHub from '../components/AcademicServiceHub';
 
 // --- 1. TypeScript Data Types ---
 
@@ -207,7 +208,10 @@ const StudentTranscript: React.FC = () => {
       ))}
 
       <View style={{ height: 50 }} />
+
+        <AcademicServiceHub/>
     </ScrollView>
+    
   );
 };
 
