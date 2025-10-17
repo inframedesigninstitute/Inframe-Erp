@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-const MobileApp = () => {
+const ParentWebApp = () => {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>Hello Android App</Text>
@@ -8,4 +8,4 @@ const MobileApp = () => {
   );
 };
 
-export default MobileApp;
+export default ParentWebApp;
