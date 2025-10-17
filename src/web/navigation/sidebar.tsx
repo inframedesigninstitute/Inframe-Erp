@@ -13,7 +13,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNav } from "../contexts/nav-context";
 
 const menuData = [
-   { label: "Dashboard", icon: "dashboard", iconType: MaterialIcons, path: "Dashboard" },
+  { label: "Dashboard", icon: "dashboard", iconType: MaterialIcons, path: "Dashboard" },
   { label: "Class Schedule", icon: "event", iconType: MaterialIcons, path: "students/TimeTableScreen" },
   { label: "Exam and Result Sammary", icon: "assignment", iconType: MaterialIcons, path: "ExamScheduleScreen" },
   { label: "Attendances", icon: "check-circle", iconType: MaterialIcons, path: "students/Lecture_wise_AttendanceScreen" },
@@ -23,21 +23,26 @@ const menuData = [
   { label: "Notices", icon: "campaign", iconType: MaterialIcons, path: "NoticeBoardScreen" }, // 'campaign' or 'volume_up' for loudspeaker/notice icon
   { label: "Assignments", icon: "assignment", iconType: MaterialIcons, path: "AssignmentListScreen" }, // For paper with lines icon
   { label: "Download", icon: "file-download", iconType: MaterialIcons, path: "DownloadListScreen" },
-    { label: "Hostel / Transport Updates", icon: "local-taxi", path: "RequestStatusScreen" },
+  { label: "Hostel / Transport Updates", icon: "local-taxi", path: "RequestStatusScreen" },
+    { label: "Notes", icon: "notes", iconType: MaterialIcons, path: "NotesScreen" },
+
+   {
+    label: "FeedbackScreen",
+    path: "FeedbackScreen",
+    icon: "feedback",      // MaterialCommunityIcons
+    iconType: MaterialCommunityIcons
+  },
+  {
+    label: "Canteen",
+    path: "CanteenScreen",
+    icon: "add-shopping-cart",
+    iconType: MaterialCommunityIcons
+  },
   { label: "Transcript/Final Document", icon: "description", iconType: MaterialIcons, path: "StudentTranscript" }, // For 'Transcript' or 'paper' like icon
   { label: "My Profile", icon: "person", iconType: MaterialIcons, path: "students/ProfileScreen" },
-       { 
-        label: "FeedbackScreen", 
-        path: "FeedbackScreen",
-        icon: "feedback",      // MaterialCommunityIcons
-        iconType: MaterialCommunityIcons
-    },
-   { 
-        label: "Canteen", 
-        path: "CanteenScreen",
-        icon: "add-shopping-cart", 
-        iconType: MaterialCommunityIcons
-    },
+  
+    { label: "Setting", icon: "person", iconType: MaterialIcons, path: "students/ProfileScreen" },
+
 
 
   // {FeedbackScreen
@@ -58,7 +63,7 @@ const menuData = [
   //         { label: "ProfileScreen", path: "students/ProfileScreen" },
   //          { label: "COUSERS", path: "students/CousersScreen" },
 
-        
+
   //   ]
   // },
   // { label: "Fees Collection", icon: "payments", children: [
@@ -158,8 +163,8 @@ export default function Sidebar() {
 
 const styles = StyleSheet.create({
   sidebar: {
-   
-    width:"28%",
+
+    width: "28%",
     backgroundColor: "#f8f1f1ff",
     height: "100%",
     padding: 12,
@@ -180,8 +185,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   scrollArea: {
-    flex: 1, 
-height: "100%",
+    flex: 1,
+    height: "100%",
     ...Platform.select({
       web: {
         overflowY: "auto",

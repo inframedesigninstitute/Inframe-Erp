@@ -9,6 +9,7 @@ import FeesReport from "../screens/FeesReport"
 import GenericScreen from "../screens/generic-screen"
 import LeaveApplication from "../screens/LeaveApplication"
 import LibraryInventoryTable from "../screens/LibraryInventoryTable"
+import NotesScreen from "../screens/NotesScreen"
 import NoticeBoardScreen from "../screens/NoticeBoardScreen"
 import RequestStatusScreen from "../screens/RequestStatusScreen"
 import CousersScreen from "../screens/students/CousersScreen"
@@ -20,7 +21,11 @@ import Subject_Attendance from "../screens/students/Subject_Attendance"
 import TimeTableScreen from "../screens/students/TimeTableScreen"
 import StudentTranscript from "../screens/StudentTranscript"
 
+// ✅ New Import
+import LoginScreen from "../screens/LoginScreen"
+
 export const ROUTES: string[] = [
+  "LoginScreen", // 👈 Added here to make it the entry point
   "Dashboard",
   "Admission",
   "Admission/Applications",
@@ -38,8 +43,8 @@ export const ROUTES: string[] = [
   "students/Lecture_wise_AttendanceScreen", 
   "students/Monthly_AttendanceScreen", 
   "students/CousersScreen",
-   "students/TimeTableScreen",
-   "students/ProfileScreen",
+  "students/TimeTableScreen",
+  "students/ProfileScreen",
   "Academic",
   "Routines",
   "Examinations",
@@ -65,13 +70,18 @@ export const ROUTES: string[] = [
   "NoticeBoardScreen",
   "AssignmentListScreen",
   "DownloadListScreen",
-  "StudentTranscript","RequestStatusScreen",
+  "StudentTranscript",
+  "RequestStatusScreen",
   "FeedbackScreen",
-  "CanteenScreen"
+  "CanteenScreen",
+  "NotesScreen"
 ]
 
 export function getScreenForRoute(key: string): React.ReactElement {
   console.log("Selected route:", key)
+
+  // ✅ Added LoginScreen condition
+  if (key === "LoginScreen") return <LoginScreen />
 
   if (key === "Dashboard") return <Dashboard />
   if (key === "students/Student_Dashboard") return <Student_Dashboard />
@@ -92,7 +102,7 @@ export function getScreenForRoute(key: string): React.ReactElement {
   if (key === "RequestStatusScreen") return <RequestStatusScreen />
   if (key === "FeedbackScreen") return <FeedbackScreen />
   if (key === "CanteenScreen") return <CanteenScreen />
-
+  if (key === "NotesScreen") return <NotesScreen />
 
   return <GenericScreen title={key} />
 }
