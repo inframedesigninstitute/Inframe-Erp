@@ -1,6 +1,6 @@
 {
-  "extends": "expo/tsconfig.json", 
-  "compilerOptions": {
+ "extends": "expo/tsconfig.json",
+   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",       // ✅ Enables JSX in .tsx files
     "paths": {
