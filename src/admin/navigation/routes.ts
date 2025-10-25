@@ -1,11 +1,9 @@
-// src/admin/navigation/routes.ts
 import React from "react";
 import Academic from "../screens/AcademicScreen";
 import Accounts from "../screens/Accounts";
 import Admission from "../screens/AdmissionScreen";
 import Communicates from "../screens/Communicates";
 import Dashboard from "../screens/Dashboard";
-import EmployeeListScreen from "../screens/EmployeeListScreen";
 import Examinations from "../screens/Examinations";
 import FeesCollection from "../screens/FeesCollection";
 import FrontDesk from "../screens/FrontDesk";
@@ -23,14 +21,21 @@ import StudyMaterials from "../screens/StudyMaterials";
 import Transports from "../screens/Transports";
 import Users from "../screens/Users";
 
-// Sub-Menu Placeholders (if no screen yet)
-const Applications = () => null;
-const NewRegistration = () => null;
-const StudentList = () => null; // Only for Students main menu
-const Transfers = () => null;
-const StatusTypes = () => null;
-const IDCards = () => null;
-const AdmissionSettings = () => null;
+// --- Admission Submenu Screens ---
+import AdmissionApplicationsScreen from "../screens/AdmissionApplicationsScreen";
+import AdmissionIDCardsScreen from "../screens/AdmissionIDCardsScreen";
+import AdmissionNewRegistrationScreen from "../screens/AdmissionNewRegistrationScreen";
+import AdmissionSettingsScreen from "../screens/AdmissionSettingsScreen";
+import AdmissionStatusTypesScreen from "../screens/AdmissionStatusTypesScreen";
+import AdmissionStudentListScreen from "../screens/AdmissionStudentListScreen";
+import AdmissionTransfersScreen from "../screens/AdmissionTransfersScreen";
+import AlumniListScreen from "../screens/AlumniListScreen";
+import AttendanceReportsScreen from "../screens/AttendanceReportsScreen";
+import AttendancesScreen from "../screens/AttendancesScreen";
+import EnrollmentsScreen from "../screens/EnrollmentsScreen";
+import ManageLeaveScreen from "../screens/ManageLeaveScreen";
+import StudentNotesScreen from "../screens/StudentNotesScreen";
+import SubjectAttendancesScreen from "../screens/SubjectAttendancesScreen";
 
 export type Route = {
   name: string;
@@ -49,25 +54,39 @@ export const adminRoutes: Route[] = [
     component: Admission,
     icon: "business",
     subRoutes: [
-      { name: "Applications", component: Applications, isSubRoute: true },
-      { name: "New Registration", component: NewRegistration, isSubRoute: true },
-      { name: "Student List", component: EmployeeListScreen, isSubRoute: true }, // Updated to EmployeeListScreen
-      { name: "Transfers", component: Transfers, isSubRoute: true },
-      { name: "Status Types", component: StatusTypes, isSubRoute: true },
-      { name: "ID Cards", component: IDCards, isSubRoute: true },
-      { name: "Settings", component: AdmissionSettings, isSubRoute: true },
+      { name: "Applications", component: AdmissionApplicationsScreen, isSubRoute: true },
+      { name: "New Registration", component: AdmissionNewRegistrationScreen, isSubRoute: true },
+      { name: "Student List", component: AdmissionStudentListScreen, isSubRoute: true },
+      { name: "Transfers", component: AdmissionTransfersScreen, isSubRoute: true },
+      { name: "Status Types", component: AdmissionStatusTypesScreen, isSubRoute: true },
+      { name: "ID Cards", component: AdmissionIDCardsScreen, isSubRoute: true },
+      { name: "Settings", component: AdmissionSettingsScreen, isSubRoute: true },
     ],
   },
 
-  {
-    name: "Students",
-    component: Students,
+  { 
+    name: "Students", 
+    component: Students, 
     icon: "people",
     subRoutes: [
-      { name: "Student List", component: StudentList, isSubRoute: true }, // Separate placeholder
+      // Matches the "Attendances" section with its own submenu
+      { 
+        name: "Attendances", 
+        component: AttendancesScreen, // This could be the main attendance overview screen
+        // icon: "...", // Add an icon if needed
+        subRoutes: [
+          { name: "Subject Attendances", component: SubjectAttendancesScreen, isSubRoute: true },
+          { name: "Attendance Reports", component: AttendanceReportsScreen, isSubRoute: true },
+        ]
+      },
+      // Individual menu items
+      { name: "Manage Leave", component: ManageLeaveScreen, isSubRoute: true },
+      { name: "Student Notes", component: StudentNotesScreen, isSubRoute: true },
+      // Matches the "Enrollments" item (which has a right arrow in the image, suggesting a submenu)
+      { name: "Enrollments", component: EnrollmentsScreen, isSubRoute: true }, // Add subRoutes if Enrollments is a further nested menu
+      { name: "Alumni List", component: AlumniListScreen, isSubRoute: true },
     ],
   },
-
   { name: "Academic", component: Academic, icon: "book" },
   { name: "Routines", component: Routines, icon: "calendar" },
   { name: "Examinations", component: Examinations, icon: "document-text" },
