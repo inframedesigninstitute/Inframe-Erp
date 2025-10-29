@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import {
   Dimensions,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
+  TouchableOpacity, // 👈 NEW: Import Modal
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -22,7 +24,8 @@ const dropdownData = {
   Session: ['2023-2024', '2024-2025'],
   Department: ['CS', 'EE', 'ME', 'Civil'],
   Course: ['Math 101', 'Physics 202', 'English 303'],
-  FacultyRole: ['Student', 'Teacher', 'Admin', 'Guest'], 
+  FacultyRole: ['Student', 'Teacher', 'Admin', 'Guest'],
+  Semester: ['1st', '2nd', '3rd', '4th'],
 };
 
 interface StudentData {
@@ -30,17 +33,26 @@ interface StudentData {
   rollNo: string;
   status: 'Present' | 'Absent' | 'Late';
   secondaryStatus: 'Present' | 'Absent' | 'Late' | 'Leave';
+  // 👈 NEW: Added for filtering demonstration
+  program: string;
+  department: string;
 }
 
 const initialStudentData: StudentData[] = [
-  { name: 'Opon Raries', rollNo: '541.00.00', status: 'Present', secondaryStatus: 'Absent' },
-  { name: 'Nolige', rollNo: '401.00.00', status: 'Absent', secondaryStatus: 'Late' },
-  { name: 'Doyragupens', rollNo: '571.00.00', status: 'Late', secondaryStatus: 'Absent' },
-  { name: 'Dunalule', rollNo: '561.00.00', status: 'Present', secondaryStatus: 'Late' },
+  { name: 'Opon Raries', rollNo: '541.00.00', status: 'Present', secondaryStatus: 'Absent', program: 'B.Tech', department: 'CS' },
+  { name: 'Nolige Testy', rollNo: '401.00.00', status: 'Absent', secondaryStatus: 'Late', program: 'B.Tech', department: 'EE' },
+  { name: 'Doyragupens', rollNo: '571.00.00', status: 'Late', secondaryStatus: 'Absent', program: 'M.Tech', department: 'CS' },
+  { name: 'Dunalule Max', rollNo: '561.00.00', status: 'Present', secondaryStatus: 'Late', program: 'BBA', department: 'Civil' },
+  { name: 'Alice Smith', rollNo: '123.45.67', status: 'Present', secondaryStatus: 'Present', program: 'B.Tech', department: 'ME' },
+  { name: 'Bob Johnson', rollNo: '890.12.34', status: 'Absent', secondaryStatus: 'Leave', program: 'MBA', department: 'EE' },
+  { name: 'Charlie Day', rollNo: '111.22.33', status: 'Late', secondaryStatus: 'Present', program: 'B.Tech', department: 'CS' },
 ];
 
-// --- Custom Combobox Dropdown Component (Unchanged) ---
+// --- Statuses for Edit Modal
+const ATTENDANCE_STATUSES: Array<'Present' | 'Absent' | 'Late' | 'Leave'> = ['Present', 'Absent', 'Late', 'Leave'];
 
+// --- Custom Combobox Dropdown Component (Unchanged) ---
+// (ComboboxDropdown component remains the same as provided)
 interface ComboboxDropdownProps {
   label: string;
   options: string[];
@@ -49,31 +61,28 @@ interface ComboboxDropdownProps {
   onSelect: (value: string) => void;
   isOpen: boolean;
   onToggle: () => void;
-  // Z-Index Fix: Dynamic z-index is passed to ensure the open dropdown is on top
-  dynamicZIndex: number; 
+  dynamicZIndex: number;
 }
 
-const ComboboxDropdown: React.FC<ComboboxDropdownProps> = ({ 
-  label, 
-  options, 
-  isText, 
-  selectedValue, 
+const ComboboxDropdown: React.FC<ComboboxDropdownProps> = ({
+  label,
+  options,
+  isText,
+  selectedValue,
   onSelect,
   isOpen,
   onToggle,
-  dynamicZIndex // <-- NEW PROP
+  dynamicZIndex
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filter options based on search term
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
     return options.filter(option =>
       option.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [options, searchTerm]);
-  
-  // Handle text inputs (like Emsds) separately
+
   if (isText) {
     return (
       <View style={styles.filterBox}>
@@ -87,34 +96,29 @@ const ComboboxDropdown: React.FC<ComboboxDropdownProps> = ({
     );
   }
 
-  // Combobox style dropdown
   const displayValue = selectedValue === label ? `Select ${label}...` : selectedValue;
 
   return (
-    // FIX: Apply dynamic zIndex. If open, use the high dynamicZIndex. If closed, use zIndex 1.
-    <View style={[styles.filterBox, { zIndex: isOpen ? dynamicZIndex : 1 }]}> 
-      {/* Popover Trigger (The visible button) */}
-      <TouchableOpacity 
-        style={styles.filterButton} 
-        onPress={() => { 
-          onToggle(); 
-          setSearchTerm(''); // Reset search when opening
+    <View style={[styles.filterBox, { zIndex: isOpen ? dynamicZIndex : 1 }]}>
+      <TouchableOpacity
+        style={styles.filterButton}
+        onPress={() => {
+          onToggle();
+          setSearchTerm('');
         }}
       >
         <Text style={[styles.filterText, selectedValue !== label && styles.selectedFilterText]}>
           {displayValue}
         </Text>
-        <Icon 
-          name={isOpen ? "chevron-up-outline" : "chevron-down-outline"} 
-          size={16} 
-          color="#333" 
+        <Icon
+          name={isOpen ? "chevron-up-outline" : "chevron-down-outline"}
+          size={16}
+          color="#333"
         />
       </TouchableOpacity>
-      
-      {/* Popover Content (The searchable command box) */}
+
       {isOpen && (
         <View style={styles.dropdownOptions}>
-          {/* CommandInput */}
           <TextInput
             style={styles.dropdownSearchInput}
             placeholder={`Search ${label}...`}
@@ -122,7 +126,6 @@ const ComboboxDropdown: React.FC<ComboboxDropdownProps> = ({
             onChangeText={setSearchTerm}
             autoFocus={true}
           />
-          {/* CommandList/CommandGroup */}
           <ScrollView style={styles.dropdownScroll} keyboardShouldPersistTaps="always">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
@@ -131,14 +134,14 @@ const ComboboxDropdown: React.FC<ComboboxDropdownProps> = ({
                   style={styles.dropdownItem}
                   onPress={() => {
                     onSelect(option);
-                    onToggle(); // Close after selection
+                    onToggle();
                   }}
                 >
                   <Text style={styles.dropdownItemText}>{option}</Text>
-                  <Icon 
-                    name="checkmark-outline" 
-                    size={18} 
-                    color={selectedValue === option ? '#1A73E8' : 'transparent'} 
+                  <Icon
+                    name="checkmark-outline"
+                    size={18}
+                    color={selectedValue === option ? '#1A73E8' : 'transparent'}
                   />
                 </TouchableOpacity>
               ))
@@ -155,7 +158,8 @@ const ComboboxDropdown: React.FC<ComboboxDropdownProps> = ({
 };
 
 
-// --- 🚀 NEW COMPONENT: StudentAttendanceDateRangePicker 🚀 ---
+// --- StudentAttendanceDateRangePicker Component (Unchanged) ---
+// (StudentAttendanceDateRangePicker component remains the same as provided)
 
 interface StudentAttendanceDateRangePickerProps {
   startDate: string;
@@ -176,57 +180,47 @@ const StudentAttendanceDateRangePicker: React.FC<StudentAttendanceDateRangePicke
 
   const toggleOpen = () => setIsOpen(!isOpen);
 
-  // Display value for the trigger button
-  const displayValue = 
-    startDate || endDate 
-    ? `${startDate || 'Start Date'} - ${endDate || 'End Date'}`
-    : 'Select Date Range...';
+  const displayValue =
+    startDate || endDate
+      ? `${startDate || 'Start Date'} - ${endDate || 'End Date'}`
+      : 'Select Date Range...';
 
   return (
-    // Dynamic ZIndex for the main box
-    // Note: We use styles.filterBox size logic but dateStyles for visual parts
     <View style={[styles.filterBox, dateStyles.filterBoxOverride, { zIndex: isOpen ? dynamicZIndex : 1 }]}>
-      
-      {/* Popover Trigger Button */}
-      <TouchableOpacity 
-        style={dateStyles.filterButton} 
+
+      <TouchableOpacity
+        style={dateStyles.filterButton}
         onPress={toggleOpen}
       >
         <Text style={[dateStyles.filterText, (startDate || endDate) && dateStyles.selectedFilterText]}>
           {displayValue}
         </Text>
-        <Icon 
-          name={isOpen ? "chevron-up-outline" : "chevron-down-outline"} 
-          size={16} 
-          color="#333" 
+        <Icon
+          name={isOpen ? "chevron-up-outline" : "chevron-down-outline"}
+          size={16}
+          color="#161515ff"
         />
       </TouchableOpacity>
 
-      {/* Popover Content (Input Fields & Calendar Icon) */}
       {isOpen && (
         <View style={dateStyles.dropdownOptions}>
           <Text style={dateStyles.dateRangeLabel}>Date Range</Text>
-          
+
           <View style={dateStyles.dateInputRow}>
-            {/* Start Date Input */}
             <TextInput
               style={dateStyles.dateInput}
-              placeholder="Start Date"
+              placeholder="Start Date (DD/MM/YYYY)" // Added format hint
               value={startDate}
               onChangeText={onStartDateChange}
-              // Ideally, this focus opens a native date picker or modal calendar
             />
-            
-            {/* End Date Input */}
+
             <TextInput
-              style={[dateStyles.dateInput, { marginRight: 0 }]} // Adjusted style
-              placeholder="End Date"
+              style={[dateStyles.dateInput, { marginRight: 0 }]}
+              placeholder="End Date (DD/MM/YYYY)" // Added format hint
               value={endDate}
               onChangeText={onEndDateChange}
-              // Ideally, this focus opens a native date picker or modal calendar
             />
-            
-            {/* Calendar Icon Button */}
+
             <TouchableOpacity style={dateStyles.calendarIcon} onPress={() => alert('Open Calendar Picker')}>
               <Icon name="calendar-outline" size={18} color="#999" />
             </TouchableOpacity>
@@ -237,7 +231,7 @@ const StudentAttendanceDateRangePicker: React.FC<StudentAttendanceDateRangePicke
   );
 };
 
-// 2. Status Badge (Same as before)
+// --- Status Badge (Same as before)
 interface StatusBadgeProps {
   status: 'Present' | 'Absent' | 'Late' | 'Leave';
 }
@@ -258,7 +252,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
       backgroundColor = '#FFFEE6';
       color = '#FF9900';
       break;
-    case 'Leave': 
+    case 'Leave':
       backgroundColor = '#E0F0FF';
       color = '#1A73E8';
       break;
@@ -274,26 +268,164 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   );
 };
 
+// --- 🚀 NEW/UPDATED Modal Components 🚀 ---
+
+// 1. View History Modal
+interface HistoryModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+  student: StudentData | null;
+}
+
+const HistoryModal: React.FC<HistoryModalProps> = ({ isVisible, onClose, student }) => {
+  if (!student) return null;
+
+  return (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={modalStyles.centeredView}>
+          <TouchableWithoutFeedback onPress={() => { /* Prevent closing when tapping inside modal */ }}>
+            <View style={modalStyles.modalView}>
+              <View style={modalStyles.modalHeader}>
+                <Text style={modalStyles.modalTitle}>Attendance History for {student.name}</Text>
+                <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+                  <Icon name="close-circle-outline" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={modalStyles.modalBodyText}><Text style={{ fontWeight: 'bold' }}>Roll No:</Text> {student.rollNo}</Text>
+              <Text style={modalStyles.modalBodyText}><Text style={{ fontWeight: 'bold' }}>Program:</Text> {student.program}</Text>
+              <Text style={modalStyles.modalBodyText}><Text style={{ fontWeight: 'bold' }}>Department:</Text> {student.department}</Text>
+              <Text style={modalStyles.modalBodyText}><Text style={{ fontWeight: 'bold' }}>Current Status 1:</Text> <StatusBadge status={student.status} /></Text>
+              <Text style={modalStyles.modalBodyText}><Text style={{ fontWeight: 'bold' }}>Current Status 2:</Text> <StatusBadge status={student.secondaryStatus} /></Text>
+
+              {/* Placeholder for actual history details */}
+              <ScrollView style={modalStyles.historyScroll}>
+                <Text style={modalStyles.historyText}>[Placeholder: Detailed history log for past sessions and dates would be displayed here.]</Text>
+                <Text style={modalStyles.historyText}>01/01/2024: Present, 02/01/2024: Absent, 03/01/2024: Late</Text>
+                <Text style={modalStyles.historyText}>04/01/2024: Present, 05/01/2024: Leave, 06/01/2024: Present</Text>
+                {/* ... more history entries */}
+              </ScrollView>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+};
+
+// 2. Edit Attendance Modal
+interface EditModalProps {
+  isVisible: boolean;
+  onClose: () => void;
+  student: StudentData | null;
+  onSave: (rollNo: string, newStatus: StudentData['status'], newSecondaryStatus: StudentData['secondaryStatus']) => void;
+}
+
+const EditModal: React.FC<EditModalProps> = ({ isVisible, onClose, student, onSave }) => {
+  // Use state for the status inside the modal
+  const [newStatus, setNewStatus] = useState<StudentData['status'] | undefined>(student?.status);
+  const [newSecondaryStatus, setNewSecondaryStatus] = useState<StudentData['secondaryStatus'] | undefined>(student?.secondaryStatus);
+
+  // Update local state when student prop changes (when modal opens)
+  React.useEffect(() => {
+    if (student) {
+      setNewStatus(student.status);
+      setNewSecondaryStatus(student.secondaryStatus);
+    }
+  }, [student]);
+
+  if (!student) return null;
+
+  const handleSave = () => {
+    if (newStatus && newSecondaryStatus) {
+      onSave(student.rollNo, newStatus, newSecondaryStatus);
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={modalStyles.centeredView}>
+          <TouchableWithoutFeedback onPress={() => { /* Prevent closing when tapping inside modal */ }}>
+            <View style={modalStyles.modalView}>
+              <View style={modalStyles.modalHeader}>
+                <Text style={modalStyles.modalTitle}>Edit Attendance for {student.name}</Text>
+                <TouchableOpacity onPress={onClose} style={modalStyles.closeButton}>
+                  <Icon name="close-circle-outline" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={modalStyles.modalLabel}>Primary Status ({student.rollNo})</Text>
+              <View style={modalStyles.statusGrid}>
+                {ATTENDANCE_STATUSES.filter(s => s !== 'Leave').map(status => (
+                  <TouchableOpacity
+                    key={status}
+                    style={[
+                      modalStyles.statusButton,
+                      newStatus === status && modalStyles.statusButtonSelected,
+                    ]}
+                    onPress={() => setNewStatus(status)}
+                  >
+                    <StatusBadge status={status} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={modalStyles.modalLabel}>Secondary Status (Date: 29/10/2025)</Text>
+              <View style={modalStyles.statusGrid}>
+                {ATTENDANCE_STATUSES.map(status => (
+                  <TouchableOpacity
+                    key={status}
+                    style={[
+                      modalStyles.statusButton,
+                      newSecondaryStatus === status && modalStyles.statusButtonSelected,
+                    ]}
+                    onPress={() => setNewSecondaryStatus(status)}
+                  >
+                    <StatusBadge status={status} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+
+              <TouchableOpacity style={modalStyles.saveButton} onPress={handleSave}>
+                <Text style={modalStyles.saveButtonText}>Save Changes</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+};
+
+
 // --- Main Component ---
 
 const SubjectAttendanceManagement: React.FC = () => {
   const [students, setStudents] = useState<StudentData[]>(initialStudentData);
-  
-  // State to manage all filter selections
+  const [filteredStudents, setFilteredStudents] = useState<StudentData[]>(initialStudentData); // 👈 NEW: Data shown in table
+
+  // State to manage all filter selections (Simplified)
   const [filters, setFilters] = useState({
-    Faculty: 'Faculty', 
-    Program1: 'Program',
+    Faculty: 'Faculty',
+    Program: 'Program',
     Session: 'Session',
-    Emsds: '', 
-    Program2: 'Program',
-    Semester1: 'Semester',
-    Semester2: 'Semester',
-    Niuss: '', 
+    Semester: 'Semester',
     Department: 'Department',
-    Course1: 'Course',
-    Llanl: '', 
-    Phutty: '', 
-    Course2: 'Course',
+    Course: 'Course',
     DateRangeStart: '',
     DateRangeEnd: '',
   });
@@ -301,7 +433,13 @@ const SubjectAttendanceManagement: React.FC = () => {
   // State to manage which dropdown is open
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+  // State for Modals
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentData | null>(null);
+
   const handleFilterSelect = (key: keyof typeof filters, value: string) => {
+    // Only update filter value, do not trigger search immediately
     const finalValue = (value === filters[key]) ? key : value;
     setFilters(prev => ({ ...prev, [key]: finalValue }));
   };
@@ -311,16 +449,61 @@ const SubjectAttendanceManagement: React.FC = () => {
   };
 
   const handleEdit = (rollNo: string) => {
-    alert(`Editing attendance for Roll No: ${rollNo}`);
+    const student = students.find(s => s.rollNo === rollNo);
+    if (student) {
+      setSelectedStudent(student);
+      setEditModalVisible(true);
+    }
   };
-  
+
+  const handleViewHistory = (student: StudentData) => {
+    setSelectedStudent(student);
+    setHistoryModalVisible(true);
+  };
+
+  const handleSaveAttendance = (
+    rollNo: string,
+    newStatus: StudentData['status'],
+    newSecondaryStatus: StudentData['secondaryStatus']
+  ) => {
+    // 1. Update the main student data source
+    const updatedStudents = students.map(s =>
+      s.rollNo === rollNo
+        ? { ...s, status: newStatus, secondaryStatus: newSecondaryStatus }
+        : s
+    );
+    setStudents(updatedStudents);
+
+    // 2. Re-apply the current search/filter to the *new* data
+    const newFiltered = applyFilters(updatedStudents, filters);
+    setFilteredStudents(newFiltered);
+
+    alert(`Attendance for ${rollNo} updated successfully!`);
+  };
+
+  // 👈 NEW: Filtering Logic (Applied when Search is clicked)
+  const applyFilters = (data: StudentData[], currentFilters: typeof filters): StudentData[] => {
+    return data.filter(student => {
+      // Filter logic: Only include a student if ALL non-default filters match
+      const programMatch = currentFilters.Program === 'Program' || student.program === currentFilters.Program;
+      const departmentMatch = currentFilters.Department === 'Department' || student.department === currentFilters.Department;
+
+      // NOTE: Other filters (Faculty, Session, Semester, Course, DateRange) would require more complex data structures and logic.
+      // For this example, we will filter by Program and Department.
+
+      return programMatch && departmentMatch;
+    });
+  }
+
   const handleSearch = () => {
     console.log('Searching with filters:', filters);
-    alert('Search function triggered! Check console for filters.');
+    // Apply filters to the complete list of students
+    const newFilteredStudents = applyFilters(students, filters);
+    setFilteredStudents(newFilteredStudents);
+    alert(`Search function triggered! Showing ${newFilteredStudents.length} results.`);
   };
-  
+
   // Z-Index Fix: Calculate a high, descending zIndex for each row/column
-  // We start from a high number (e.g., 20) and decrease it for each filter.
   let currentZIndex = 20;
 
 
@@ -338,95 +521,50 @@ const SubjectAttendanceManagement: React.FC = () => {
 
         {/* Filter Section (Grid/Flex Layout) */}
         <View style={styles.filterGrid}>
-          
+
           {/* Row 1 (4 items) */}
-          <ComboboxDropdown 
-            label="Faculty" options={dropdownData.FacultyRole} isText={false} 
+          <ComboboxDropdown
+            label="Faculty" options={dropdownData.FacultyRole} isText={false}
             selectedValue={filters.Faculty} onSelect={(v) => handleFilterSelect('Faculty', v)}
             isOpen={openDropdown === 'Faculty'} onToggle={() => handleToggleDropdown('Faculty')}
-            dynamicZIndex={currentZIndex--} // Assign zIndex and decrement
-          />
-          <ComboboxDropdown 
-            label="Program" options={dropdownData.Program} isText={false}
-            selectedValue={filters.Program1} onSelect={(v) => handleFilterSelect('Program1', v)}
-            isOpen={openDropdown === 'Program1'} onToggle={() => handleToggleDropdown('Program1')}
             dynamicZIndex={currentZIndex--}
           />
-          <ComboboxDropdown 
+          <ComboboxDropdown
+            label="Program" options={dropdownData.Program} isText={false}
+            selectedValue={filters.Program} onSelect={(v) => handleFilterSelect('Program', v)}
+            isOpen={openDropdown === 'Program'} onToggle={() => handleToggleDropdown('Program')}
+            dynamicZIndex={currentZIndex--}
+          />
+          <ComboboxDropdown
             label="Session" options={dropdownData.Session} isText={false}
             selectedValue={filters.Session} onSelect={(v) => handleFilterSelect('Session', v)}
             isOpen={openDropdown === 'Session'} onToggle={() => handleToggleDropdown('Session')}
             dynamicZIndex={currentZIndex--}
           />
-          <ComboboxDropdown 
-            label="Emsds" options={[]} isText={true}
-            selectedValue={filters.Emsds} onSelect={(v) => handleFilterSelect('Emsds', v)}
-            isOpen={false} onToggle={() => {}}
+          <ComboboxDropdown
+            label="Semester" options={dropdownData.Semester} isText={false}
+            selectedValue={filters.Semester} onSelect={(v) => handleFilterSelect('Semester', v)}
+            isOpen={openDropdown === 'Semester'} onToggle={() => handleToggleDropdown('Semester')}
             dynamicZIndex={currentZIndex--}
           />
 
-          {/* Row 2 (4 items) */}
-          <ComboboxDropdown 
-            label="Program" options={dropdownData.Program} isText={false}
-            selectedValue={filters.Program2} onSelect={(v) => handleFilterSelect('Program2', v)}
-            isOpen={openDropdown === 'Program2'} onToggle={() => handleToggleDropdown('Program2')}
-            dynamicZIndex={currentZIndex--}
-          />
-          <ComboboxDropdown 
-            label="Semester" options={['1st', '2nd', '3rd', '4th']} isText={false}
-            selectedValue={filters.Semester1} onSelect={(v) => handleFilterSelect('Semester1', v)}
-            isOpen={openDropdown === 'Semester1'} onToggle={() => handleToggleDropdown('Semester1')}
-            dynamicZIndex={currentZIndex--}
-          />
-          <ComboboxDropdown 
-            label="Semester" options={['1st', '2nd', '3rd', '4th']} isText={false}
-            selectedValue={filters.Semester2} onSelect={(v) => handleFilterSelect('Semester2', v)}
-            isOpen={openDropdown === 'Semester2'} onToggle={() => handleToggleDropdown('Semester2')}
-            dynamicZIndex={currentZIndex--}
-          />
-          <ComboboxDropdown 
-            label="Niuss" options={[]} isText={true}
-            selectedValue={filters.Niuss} onSelect={(v) => handleFilterSelect('Niuss', v)}
-            isOpen={false} onToggle={() => {}}
-            dynamicZIndex={currentZIndex--}
-          />
-
-          {/* Row 3 (4 items) */}
-          <ComboboxDropdown 
+          {/* Row 2 (2 items) */}
+          <ComboboxDropdown
             label="Department" options={dropdownData.Department} isText={false}
             selectedValue={filters.Department} onSelect={(v) => handleFilterSelect('Department', v)}
             isOpen={openDropdown === 'Department'} onToggle={() => handleToggleDropdown('Department')}
             dynamicZIndex={currentZIndex--}
           />
-          <ComboboxDropdown 
+          <ComboboxDropdown
             label="Course" options={dropdownData.Course} isText={false}
-            selectedValue={filters.Course1} onSelect={(v) => handleFilterSelect('Course1', v)}
-            isOpen={openDropdown === 'Course1'} onToggle={() => handleToggleDropdown('Course1')}
+            selectedValue={filters.Course} onSelect={(v) => handleFilterSelect('Course', v)}
+            isOpen={openDropdown === 'Course'} onToggle={() => handleToggleDropdown('Course')}
             dynamicZIndex={currentZIndex--}
           />
-          <ComboboxDropdown 
-            label="Llanl" options={[]} isText={true}
-            selectedValue={filters.Llanl} onSelect={(v) => handleFilterSelect('Llanl', v)}
-            isOpen={false} onToggle={() => {}}
-            dynamicZIndex={currentZIndex--}
-          />
-          <ComboboxDropdown 
-            label="Phutty" options={[]} isText={true}
-            selectedValue={filters.Phutty} onSelect={(v) => handleFilterSelect('Phutty', v)}
-            isOpen={false} onToggle={() => {}}
-            dynamicZIndex={currentZIndex--}
-          />
-          
-          {/* Row 4 (1 Combobox and 1 Date Range Picker) */}
-          <ComboboxDropdown 
-            label="Course" options={dropdownData.Course} isText={false}
-            selectedValue={filters.Course2} onSelect={(v) => handleFilterSelect('Course2', v)}
-            isOpen={openDropdown === 'Course2'} onToggle={() => handleToggleDropdown('Course2')}
-            dynamicZIndex={currentZIndex--}
-          />
-          
-          {/* 🚀 Date Range Picker Integration 🚀 */}
-          <StudentAttendanceDateRangePicker 
+
+          {/* Row 3 (Date Range Picker) */}
+          {/* Note: In a 4-column layout, this will take up a whole row or two columns, depending on the remaining space. */}
+          <StudentAttendanceDateRangePicker
             startDate={filters.DateRangeStart}
             endDate={filters.DateRangeEnd}
             onStartDateChange={(v) => handleFilterSelect('DateRangeStart', v)}
@@ -442,152 +580,265 @@ const SubjectAttendanceManagement: React.FC = () => {
           <Text style={styles.searchButtonText}>Search</Text>
         </TouchableOpacity>
 
-        {/* --- Data Table Section --- */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tableScroll}>
-          <View style={styles.table}>
-            {/* Table Header */}
-            <View style={styles.tableHeaderRow}>
-              <Text style={[styles.tableHeader, styles.colName]}>Student Name</Text>
-              <Text style={[styles.tableHeader, styles.colRollNo]}>Roll No.</Text>
-              <Text style={[styles.tableHeader, styles.colStatus]}>Status</Text>
-              <Text style={[styles.tableHeader, styles.colStatus]}>Status</Text>
-              <Text style={[styles.tableHeader, styles.colActions]}>Actions</Text>
-            </View>
+        {/* --- Data Table Section (Uses filteredStudents) --- */}
+        {filteredStudents.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tableScroll}>
+            {/* 👈 NEW: max-width is controlled by container, min-width forces scroll */}
+            <View style={styles.table}>
+              {/* Table Header */}
+              <View style={styles.tableHeaderRow}>
+                <Text style={[styles.tableHeader, styles.colName]}>Student Name</Text>
+                <Text style={[styles.tableHeader, styles.colRollNo]}>Roll No.</Text>
+                <Text style={[styles.tableHeader, styles.colStatus]}>Status (1)</Text>
+                <Text style={[styles.tableHeader, styles.colStatus]}>Status (2)</Text>
+                <Text style={[styles.tableHeader, styles.colActions]}>Actions</Text>
+              </View>
 
-            {/* Table Body */}
-            {students.map((student, index) => (
-              <View key={index} style={styles.tableRow}>
-                <Text style={[styles.tableCell, styles.colName]}>{student.name}</Text>
-                <Text style={[styles.tableCell, styles.colRollNo]}>{student.rollNo}</Text>
-                
-                {/* Status Badges */}
-                <View style={[styles.tableCell, styles.colStatus, { flexDirection: 'row', alignItems: 'center' }]}>
-                  <StatusBadge status={student.status} />
-                </View>
-                <View style={[styles.tableCell, styles.colStatus, { flexDirection: 'row', alignItems: 'center' }]}>
-                  <StatusBadge status={student.secondaryStatus} />
-                </View>
-                
-                {/* Actions */}
-                <View style={[styles.tableCell, styles.colActions, styles.actionsCell]}>
-                  <TouchableOpacity style={styles.actionButtonEdit} onPress={() => handleEdit(student.rollNo)}>
-                    <Text style={styles.actionButtonText}>Edit</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButtonSmall}>
-                    <Icon name="create-outline" size={16} color="#333" />
-                  </TouchableOpacity>
-                  
-                  {student.name === 'Dunalule' && (
-                    <TouchableOpacity style={styles.actionButtonHistory}>
-                      <Icon name="time-outline" size={16} color="#333" style={{marginRight: 4}}/>
+              {/* Table Body */}
+              {filteredStudents.map((student, index) => (
+                <View key={index} style={styles.tableRow}>
+                  <Text style={[styles.tableCell, styles.colName]}>{student.name}</Text>
+                  <Text style={[styles.tableCell, styles.colRollNo]}>{student.rollNo}</Text>
+
+                  {/* Status Badges */}
+                  <View style={[styles.tableCell, styles.colStatus, { flexDirection: 'row', alignItems: 'center' }]}>
+                    <StatusBadge status={student.status} />
+                  </View>
+                  <View style={[styles.tableCell, styles.colStatus, { flexDirection: 'row', alignItems: 'center' }]}>
+                    <StatusBadge status={student.secondaryStatus} />
+                  </View>
+
+                  {/* Actions */}
+                  <View style={[styles.tableCell, styles.colActions, styles.actionsCell]}>
+                    <TouchableOpacity style={styles.actionButtonEdit} onPress={() => handleEdit(student.rollNo)}>
+                      <Text style={styles.actionButtonText}>Edit</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButtonHistory} onPress={() => handleViewHistory(student)}>
+                      <Icon name="time-outline" size={16} color="#333" style={{ marginRight: 4 }} />
                       <Text style={styles.actionButtonTextHistory}>View History</Text>
                     </TouchableOpacity>
-                  )}
+
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
+          </ScrollView>
+        ) : (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>No students found. Try a different filter or click 'Search'.</Text>
           </View>
-        </ScrollView>
+        )}
+
         {/* --- Footer and Pagination --- */}
         <View style={styles.footerRow}>
           <TouchableOpacity style={styles.exportButton}>
             <Text style={styles.exportButtonText}>Export Report</Text>
           </TouchableOpacity>
-          
+
           {/* Pagination Placeholder */}
           <View style={styles.pagination}>
-             <Icon name="chevron-back-outline" size={18} color="#999" style={styles.pageIcon} />
-             <Text style={styles.pageIndicator}>+</Text>
-             <Text style={styles.pageIndicator}>-</Text>
-             <Text style={styles.pageIndicator}>=</Text>
-             <Icon name="chevron-forward-outline" size={18} color="#333" style={styles.pageIcon} />
+            <Icon name="chevron-back-outline" size={18} color="#999" style={styles.pageIcon} />
+            <Text style={styles.pageIndicator}>1</Text>
+            <Text style={styles.pageIndicator}>2</Text>
+            <Text style={styles.pageIndicator}>3</Text>
+            <Icon name="chevron-forward-outline" size={18} color="#333" style={styles.pageIcon} />
           </View>
         </View>
       </View>
+
+      {/* Modals */}
+      <HistoryModal
+        isVisible={historyModalVisible}
+        onClose={() => setHistoryModalVisible(false)}
+        student={selectedStudent}
+      />
+      <EditModal
+        isVisible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        student={selectedStudent}
+        onSave={handleSaveAttendance}
+      />
     </View>
   );
 };
 
-// --- Date Range Picker Styles (New Styles) ---
-const dateStyles = StyleSheet.create({
-    filterBoxOverride: {
-        width: isLargeScreen ? '48%' : '100%', // Adjust width as per design needs
+// --- Modal Styles (NEW STYLES) ---
+const modalStyles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Dark overlay
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 25,
+    width: '90%',
+    maxWidth: 500,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    filterButton: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: '100%',
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-        backgroundColor: '#f9f9f9',
-    },
-    filterText: {
-        color: '#999', 
-        fontSize: 14,
-    },
-    selectedFilterText: {
-        color: '#333', 
-        fontWeight: '500',
-    },
-    dropdownOptions: {
-        position: 'absolute',
-        top: 40, 
-        left: 0,
-        right: 0,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-        zIndex: 2, 
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-        padding: 10,
-    },
-    dateRangeLabel: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#666',
-        marginBottom: 5,
-    },
-    dateInputRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    dateInput: {
-        flex: 1,
-        height: 36,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-        backgroundColor: '#f9f9f9',
-        fontSize: 14,
-        color: '#333',
-        marginRight: 5, // Spacing between the two date inputs
-    },
-    calendarIcon: {
-        padding: 5,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 6,
-        backgroundColor: '#f0f0f0',
-        marginLeft: -1, // Overlap slightly for seamless look
-    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  modalBodyText: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  statusGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+    gap: 10,
+  },
+  statusButton: {
+    padding: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  statusButtonSelected: {
+    borderColor: '#1A73E8',
+    backgroundColor: '#E0F0FF',
+  },
+  saveButton: {
+    backgroundColor: '#00A859', // Green for Save
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  historyScroll: {
+    maxHeight: 100,
+    marginTop: 10,
+    paddingRight: 10,
+  },
+  historyText: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 3,
+  }
 });
 
-// --- Stylesheet (Cleaned up: Removed old Date Range Styles) ---
+
+// --- Date Range Picker Styles (Unchanged) ---
+const dateStyles = StyleSheet.create({
+  filterBoxOverride: {
+    width: isLargeScreen ? '48%' : '100%',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '100%',
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    backgroundColor: '#f9f9f9',
+  },
+  filterText: {
+    color: '#999',
+    fontSize: 14,
+  },
+  selectedFilterText: {
+    color: '#333',
+    fontWeight: '500',
+  },
+  dropdownOptions: {
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    padding: 10,
+  },
+  dateRangeLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#666',
+    marginBottom: 5,
+  },
+  dateInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateInput: {
+    flex: 1,
+    height: 36,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    backgroundColor: '#f9f9f9',
+    fontSize: 14,
+    color: '#333',
+    marginRight: 5,
+  },
+  calendarIcon: {
+    padding: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    backgroundColor: '#f0f0f0',
+    marginLeft: -1,
+  },
+});
+
+// --- Stylesheet (Updated) ---
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1, 
-    width: '100%', 
-    padding: 20, 
-    backgroundColor: '#F7F9FC', 
+    flex: 1,
+    width: '100%',
+    padding: 20, // 👈 PADDING: Main container has 20 padding
+    backgroundColor: '#F7F9FC',
   },
   card: {
     backgroundColor: '#fff',
@@ -617,7 +868,7 @@ const styles = StyleSheet.create({
   },
   importButton: {
     flexDirection: 'row',
-    backgroundColor: '#4B66E9', // Primary Blue
+    backgroundColor: '#4B66E9',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
@@ -631,21 +882,20 @@ const styles = StyleSheet.create({
   buttonIcon: {
     marginRight: 5,
   },
-  
+
   // --- Filter Styles ---
   filterGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 15,
-    zIndex: 10, // Base Z-index for the whole grid
+    zIndex: 10,
   },
   filterBox: {
-    width: isLargeScreen ? '23.5%' : '48%', 
+    width: isLargeScreen ? '23.5%' : '48%', // For a 4-column desktop layout
     marginBottom: 15,
     position: 'relative',
     height: 40,
-    // zIndex is dynamically set in the component logic
   },
   filterButton: {
     flexDirection: 'row',
@@ -659,11 +909,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   filterText: {
-    color: '#999', 
+    color: '#999',
     fontSize: 14,
   },
   selectedFilterText: {
-    color: '#333', 
+    color: '#333',
     fontWeight: '500',
   },
   filterTextInput: {
@@ -676,18 +926,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  
-  // Combobox Dropdown Specific Styles
   dropdownOptions: {
     position: 'absolute',
-    top: 40, 
+    top: 40,
     left: 0,
     right: 0,
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 6,
-    zIndex: 2, // Relative to its parent (filterBox), which now has the high zIndex
+    zIndex: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -695,7 +943,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   dropdownSearchInput: {
-    height: 36, 
+    height: 36,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -727,18 +975,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
   },
-  
+
   // Search Button
   searchButton: {
     flexDirection: 'row',
-    backgroundColor: '#1A73E8', // Search Blue
+    backgroundColor: '#1A73E8',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
     alignSelf: 'flex-start',
     marginBottom: 20,
-    zIndex: 1, 
+    zIndex: 1,
   },
   searchButtonText: {
     color: '#fff',
@@ -748,22 +996,25 @@ const styles = StyleSheet.create({
 
   // --- Table Styles ---
   tableScroll: {
-    maxHeight: 300, 
-    zIndex: 0, 
+    maxHeight: 600,
+    zIndex: 0,minHeight:"auto"
+    // Note: The horizontal scroll will handle the table content
   },
   table: {
-    minWidth: 700, 
+    // 👈 WIDTH: Ensure table container is at least 100% of the parent view (card body)
+    // The minWidth ensures horizontal scroll on small screens.
+    minWidth: 990,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: 'hidden',width:"100%"
   },
   tableHeaderRow: {
     flexDirection: 'row',
     backgroundColor: '#F5F5F5',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#e0e0e0',width:"100%"
   },
   tableHeader: {
     fontWeight: '700',
@@ -784,10 +1035,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignSelf: 'center',
   },
-  colName: { width: '30%' },
+  // Column widths adjusted for an improved layout on desktop minWidth
+  colName: { width: '25%' },
   colRollNo: { width: '15%' },
   colStatus: { width: '15%' },
-  colActions: { width: '25%' },
+  colActions: { width: '30%' },
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 10,
@@ -811,10 +1063,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 8,
   },
-  actionButtonSmall: {
-    padding: 5,
-    marginRight: 8,
-  },
   actionButtonText: {
     color: '#1A73E8',
     fontSize: 13,
@@ -824,6 +1072,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 4,
+    paddingHorizontal: 5,
   },
   actionButtonTextHistory: {
     color: '#333',
@@ -861,6 +1110,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontSize: 16,
     color: '#333',
+  },
+  // 👈 NEW: No data found message
+  noDataContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    marginTop: 10,
+    backgroundColor: '#fcfcfc',
+  },
+  noDataText: {
+    fontSize: 16,
+    color: '#999',
+    fontWeight: '500',
   }
 });
 
