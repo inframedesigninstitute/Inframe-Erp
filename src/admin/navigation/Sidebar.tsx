@@ -10,7 +10,6 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ routes, selected, onSelect }: SidebarProps) {
-  // FIX: Use an array to track all currently open menus for deep nesting
   const [openMenus, setOpenMenus] = useState<string[]>([]);
 
   const toggleMenu = (name: string) => {
@@ -19,7 +18,6 @@ export default function Sidebar({ routes, selected, onSelect }: SidebarProps) {
         // Close menu: remove the name
         return prev.filter(menuName => menuName !== name);
       } else {
-        // Open menu: add the name
         return [...prev, name];
       }
     });
@@ -62,7 +60,7 @@ export default function Sidebar({ routes, selected, onSelect }: SidebarProps) {
           {route.icon && level === 0 && (
             <Ionicons
               name={route.icon}
-              size={20}
+              size={15}
               color={isActive ? "#202630ff" : "#000000ff"}
               style={styles.icon}
             />
