@@ -25,7 +25,7 @@ import Transports from "../screens/Transports";
 import Users from "../screens/Users";
 
 // This block also needs to be DEFAULT imports if they have the same error
-import { AdmissionApplicationsScreen } from "../screens/AdmissionApplicationsScreen";
+import AdmissionApplicationsScreen from "../screens/AdmissionApplicationsScreen";
 import AdmissionIDCardsScreen from "../screens/AdmissionIDCardsScreen";
 import AdmissionNewRegistrationScreen from "../screens/AdmissionNewRegistrationScreen";
 import AdmissionSettingsScreen from "../screens/AdmissionSettingsScreen";
@@ -35,8 +35,11 @@ import AdmissionTransfersScreen from "../screens/AdmissionTransfersScreen";
 import AlumniListScreen from "../screens/AlumniListScreen";
 import AttendanceReportsScreen from "../screens/AttendanceReportsScreen";
 import AttendancesScreen from "../screens/AttendancesScreen";
+import BatchScreen from "../screens/BatchScreen";
 import EnrollmentsScreen from "../screens/EnrollmentsScreen";
+import FacultiesScreen from "../screens/FacultiesScreen";
 import ManageLeaveScreen from "../screens/ManageLeaveScreen";
+import ProgramScreen from "../screens/ProgramScreen";
 import StudentNotesScreen from "../screens/StudentNotesScreen";
 import SubjectAttendancesScreen from "../screens/SubjectAttendancesScreen";
 
@@ -111,9 +114,9 @@ export const adminRoutes: Route[] = [
   {
     name: "Academic", component: Academic, icon: "book",
     subRoutes: [
-      { name: "Faculties", component: AdmissionApplicationsScreen, isSubRoute: true },
-      { name: "Programs", component: AdmissionNewRegistrationScreen, isSubRoute: true },
-      { name: "Batchs", component: AdmissionSettingsScreen, isSubRoute: true },
+      { name: "Faculties", component: FacultiesScreen, isSubRoute: true },
+      { name: "Programs", component: ProgramScreen, isSubRoute: true },
+      { name: "Batchs", component: BatchScreen, isSubRoute: true },
       { name: "Sessions ", component: AdmissionSettingsScreen, isSubRoute: true },
       { name: "Semesters", component: AdmissionSettingsScreen, isSubRoute: true },
       { name: "Sections ", component: AdmissionSettingsScreen, isSubRoute: true },
