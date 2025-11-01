@@ -390,7 +390,6 @@ export function AdmissionApplicationsScreen() {
   return (
     <ScrollView style={styles.screenContainer} contentContainerStyle={styles.contentContainer}>
       <View style={styles.mainContentArea}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTitleContainer}>
             <View style={styles.titleDivider}></View>
@@ -399,7 +398,6 @@ export function AdmissionApplicationsScreen() {
           <Text style={styles.subtitleText}>Manage and review student applications</Text>
         </View>
 
-        {/* Filter Section */}
         <FilterSection
           programFilter={programFilter}
           statusFilter={statusFilter}
@@ -414,7 +412,6 @@ export function AdmissionApplicationsScreen() {
           onSearch={handleSearch}
         />
 
-        {/* Action Buttons */}
         <View style={styles.actionButtonsRow}>
           <CustomButton onPress={() => console.log("Download")} variant="outline" style={styles.downloadButton}>
             <Icon name="download" size={16} color="#0891b2" style={{ marginRight: 4 }} />
@@ -424,7 +421,6 @@ export function AdmissionApplicationsScreen() {
           </CustomButton>
         </View>
 
-        {/* Applications Table */}
         <ApplicationsTable
           applications={filteredApplications}
           onApprove={handleApprove}
@@ -432,18 +428,15 @@ export function AdmissionApplicationsScreen() {
           onDelete={handleDelete}
         />
 
-        {/* Stats Section */}
         <StatsSection applications={applications} />
       </View>
     </ScrollView>
   )
 }
 
-// --- Styles ---
 const { width } = Dimensions.get("window")
 
 const styles = StyleSheet.create({
-  // --- General Styles ---
   screenContainer: { flex: 1, backgroundColor: "#f8fafc" },
   contentContainer: { padding: 16 },
   mainContentArea: { width: '100%', maxWidth: 900, alignSelf: 'center' },
@@ -462,14 +455,12 @@ const styles = StyleSheet.create({
   },
   inputIcon: { position: "absolute", right: 12 },
 
-  // --- Header Styles ---
   header: { marginBottom: 24 },
   headerTitleContainer: { flexDirection: "row", alignItems: "center", marginBottom: 8 },
   titleDivider: { width: 4, height: 32, backgroundColor: "#06b6d4", borderRadius: 9999, marginRight: 12 },
   titleText: { fontSize: 26, fontWeight: "700", color: "#0f172a" },
   subtitleText: { color: "#475569", marginLeft: 16, fontSize: 14 },
 
-  // --- Filter Section Styles ---
   filterCard: { marginBottom: 24 },
   filterContent: { padding: 16 },
   filterGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 16 },
@@ -484,14 +475,12 @@ const styles = StyleSheet.create({
   searchButton: { backgroundColor: "#06b6d4", height: 40 },
   searchButtonText: { color: "#fff", fontWeight: "600", fontSize: 14, marginLeft: 8 },
 
-  // --- Action Buttons Styles ---
   actionButtonsRow: { flexDirection: "row", gap: 8, marginBottom: 24 },
   downloadButton: {
     backgroundColor: "transparent", borderColor: "#a7f3d0", borderWidth: 1, paddingVertical: 8,
     paddingHorizontal: 12, height: 38,
   },
 
-  // --- Table Styles ---
   tableCard: { overflow: "hidden" },
   tableBorder: { borderWidth: 1, borderColor: "#f1f5f9" },
   tableHeaderRow: { height: 50, backgroundColor: "#06b6d4" },
@@ -500,11 +489,9 @@ const styles = StyleSheet.create({
   tableDataRow: { height: 60, backgroundColor: "#fff" },
   tableRowText: { marginHorizontal: 12, fontSize: 13, color: "#475569", textAlign: "left" },
 
-  // --- Badge Styles ---
   badgeBase: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 16, alignSelf: "flex-start", borderWidth: 1 },
   badgeText: { fontSize: 12, fontWeight: "600" },
 
-  // --- Action Cell Styles ---
   actionCellContainer: { flexDirection: "row", gap: 4, alignItems: "center" },
   actionButton: { padding: 8, borderRadius: 8 },
   actionApprove: { backgroundColor: "#d1fae5" },
@@ -513,7 +500,6 @@ const styles = StyleSheet.create({
   actionDelete: { backgroundColor: "#fee2e2" },
   actionDisabled: { opacity: 0.4 },
 
-  // --- Empty State ---
   emptyState: {
     width: width > 900 ? 900 : width - 32, alignItems: "center", justifyContent: "center", paddingVertical: 48,
   },
@@ -521,7 +507,6 @@ const styles = StyleSheet.create({
   emptyTextPrimary: { color: "#64748b", fontWeight: "500" },
   emptyTextSecondary: { color: "#94a3b8", fontSize: 12 },
 
-  // --- Stats Section Styles ---
   statsContainer: { marginTop: 24, flexDirection: "row", flexWrap: "wrap", gap: 16, justifyContent: "space-between" },
   statCard: { padding: 16, width: width > 600 ? "23%" : "48%", minWidth: 140, marginBottom: 8 },
   statLabel: { color: "#475569", fontSize: 14, fontWeight: "500" },
@@ -532,5 +517,4 @@ const styles = StyleSheet.create({
   statValueRejected: { color: "#dc2626" },
 })
 
-// Exporting as default to fix Error 2613
 export default AdmissionApplicationsScreen
